@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, Navigate } from "react-router";
 import { SignIn, SignUp, SignedIn, SignedOut } from "@clerk/clerk-react";
 import { ThemeToggle, useTheme } from "./ThemeContext";
+import { SEOHead } from "./SEOHead";
 
 // ───────────────────────────────────────────────────────────────────────────────
 // Auth Page (/auth)
@@ -34,6 +35,13 @@ export const AuthPage = ({ afterUrl }) => {
       className="min-h-screen flex items-center justify-center px-4 theme-transition"
       style={{ backgroundColor: "var(--bg-secondary)" }}
     >
+      {/* SEO Meta Tags - Mark auth pages as noindex */}
+      <SEOHead
+        isAuthenticated={false}
+        isPublic={false}
+        meta={{ title: "Sign In", description: "Authentication page" }}
+      />
+
       {/* Theme toggle on auth page */}
       <div className="fixed top-4 right-4">
         <ThemeToggle />
