@@ -22,6 +22,7 @@ import { ChatHistorySidebar } from "./components/Sidebar";
 import { TierModal } from "./components/TierModal";
 import { ThemeToggle } from "./components/ThemeContext";
 import { AuthPage, RequireAuth } from "./components/AuthPage";
+import { SEOHead } from "./components/SEOHead";
 
 import { useAnalytics } from "./contexts/AnalyticsContext";
 import {
@@ -639,6 +640,13 @@ const AppContent = ({
       className="min-h-screen theme-transition"
       style={{ backgroundColor: "var(--bg-primary)" }}
     >
+      {/* SEO Meta Tags */}
+      <SEOHead
+        isAuthenticated={AUTH && authApi?.isSignedIn}
+        isPublic={!AUTH}
+        meta={{ title: TITLE, description: HEADER }}
+      />
+
       {/* Chat History Sidebar */}
       <ChatHistorySidebar
         isOpen={isSidebarOpen}
