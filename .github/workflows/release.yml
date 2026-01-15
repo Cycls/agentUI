@@ -1,8 +1,9 @@
 name: Release
 
 on:
-  release:
-    types: [published]
+  push:
+    branches:
+      - main
 
 jobs:
   build:
@@ -27,7 +28,10 @@ jobs:
       - name: Create archive
         run: cd dist && zip -r ../agentUI.zip .
 
-      - name: Upload release asset
+      - name: Update latest release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: latest
+          name: Latest Build
           files: agentUI.zip
+          prerelease: true
