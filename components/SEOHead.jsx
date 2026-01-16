@@ -1,5 +1,4 @@
-import { useEffect } from "react";
-import { useLocation } from "react-router";
+import { useEffect, useState } from "react";
 
 /**
  * SEOHead Component
@@ -10,8 +9,21 @@ import { useLocation } from "react-router";
  * - Public pages can be indexed
  */
 export const SEOHead = ({ isAuthenticated, isPublic = false, meta = {} }) => {
-  const location = useLocation();
-  const currentPath = location.pathname;
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+
+  // Listen for route changes via popstate and manual path checks
+  useEffect(() => {
+    const updatePath = () => setCurrentPath(window.location.pathname);
+    window.addEventListener("popstate", updatePath);
+
+    // Also check periodically for SPA navigation
+    const interval = setInterval(updatePath, 100);
+
+    return () => {
+      window.removeEventListener("popstate", updatePath);
+      clearInterval(interval);
+    };
+  }, []);
 
   useEffect(() => {
     // Determine if current route should be indexed
