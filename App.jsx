@@ -364,11 +364,11 @@ const AppContent = ({
         }, 120000);
       };
 
-      // Set initial timeout
       resetTimeout();
 
       try {
         let currentPart = null;
+        let stepsPart = null;
 
         await sendCyclsChatMessage({
           messages: contextMessages,
@@ -377,7 +377,6 @@ const AppContent = ({
           setActive: clerkApi?.setActive,
           org: ORG,
           onPart: (item) => {
-            // Reset timeout on every chunk received
             resetTimeout();
 
             setMessages((prev) => {
@@ -386,6 +385,43 @@ const AppContent = ({
 
               if (!assistantMsg.parts) {
                 assistantMsg.parts = [];
+              }
+
+              // Handle step events - aggregate into a single "steps" part
+              // Steps can stream word-by-word. When `data` arrives, it signals step completion.
+              if (item.type === "step") {
+                if (!stepsPart) {
+                  stepsPart = { type: "steps", steps: [] };
+                  assistantMsg.parts.push(stepsPart);
+                }
+
+                const lastStep = stepsPart.steps[stepsPart.steps.length - 1];
+
+                if (item.data !== undefined) {
+                  if (lastStep && !lastStep._complete) {
+                    if (item.step) lastStep.step += item.step;
+                    lastStep.data = item.data;
+                    lastStep._complete = true;
+                  } else {
+                    stepsPart.steps.push({
+                      step: item.step || "",
+                      data: item.data,
+                      _complete: true,
+                    });
+                  }
+                } else if (item.step) {
+                  if (lastStep && !lastStep._complete) {
+                    lastStep.step += item.step;
+                  } else {
+                    stepsPart.steps.push({
+                      step: item.step,
+                      data: null,
+                      _complete: false,
+                    });
+                  }
+                }
+
+                return updated;
               }
 
               if (currentPart && currentPart.type === item.type) {
@@ -399,9 +435,21 @@ const AppContent = ({
                   currentPart.code += item.code;
                 }
               } else {
+                // Mark previous thinking part as complete when switching away
+                if (currentPart && currentPart.type === "thinking") {
+                  currentPart._complete = true;
+                  if (currentPart._startTime) {
+                    currentPart._duration = Math.round((Date.now() - currentPart._startTime) / 1000);
+                  }
+                }
+
                 currentPart = { ...item };
                 if (item.headers) {
                   currentPart.rows = [];
+                }
+                // Add start time for thinking parts
+                if (item.type === "thinking") {
+                  currentPart._startTime = Date.now();
                 }
                 assistantMsg.parts.push(currentPart);
               }
@@ -413,6 +461,23 @@ const AppContent = ({
         });
 
         if (timeoutId) clearTimeout(timeoutId);
+
+        // Mark any in-progress thinking parts as complete with duration
+        setMessages((prev) => {
+          const updated = [...prev];
+          const msg = updated[messageIndex];
+          if (msg?.parts) {
+            msg.parts.forEach((part) => {
+              if (part.type === "thinking" && !part._complete) {
+                part._complete = true;
+                if (part._startTime) {
+                  part._duration = Math.round((Date.now() - part._startTime) / 1000);
+                }
+              }
+            });
+          }
+          return updated;
+        });
 
         if (activeChatId) {
           setMessages((prev) => {
@@ -508,11 +573,11 @@ const AppContent = ({
         }, 120000);
       };
 
-      // Set initial timeout
       resetTimeout();
 
       try {
         let currentPart = null;
+        let stepsPart = null;
 
         await sendCyclsChatMessage({
           messages: contextMessages,
@@ -521,7 +586,6 @@ const AppContent = ({
           setActive: clerkApi?.setActive,
           org: ORG,
           onPart: (item) => {
-            // Reset timeout on every chunk received
             resetTimeout();
 
             setMessages((prev) => {
@@ -530,6 +594,43 @@ const AppContent = ({
 
               if (!assistantMsg.parts) {
                 assistantMsg.parts = [];
+              }
+
+              // Handle step events - aggregate into a single "steps" part
+              // Steps can stream word-by-word. When `data` arrives, it signals step completion.
+              if (item.type === "step") {
+                if (!stepsPart) {
+                  stepsPart = { type: "steps", steps: [] };
+                  assistantMsg.parts.push(stepsPart);
+                }
+
+                const lastStep = stepsPart.steps[stepsPart.steps.length - 1];
+
+                if (item.data !== undefined) {
+                  if (lastStep && !lastStep._complete) {
+                    if (item.step) lastStep.step += item.step;
+                    lastStep.data = item.data;
+                    lastStep._complete = true;
+                  } else {
+                    stepsPart.steps.push({
+                      step: item.step || "",
+                      data: item.data,
+                      _complete: true,
+                    });
+                  }
+                } else if (item.step) {
+                  if (lastStep && !lastStep._complete) {
+                    lastStep.step += item.step;
+                  } else {
+                    stepsPart.steps.push({
+                      step: item.step,
+                      data: null,
+                      _complete: false,
+                    });
+                  }
+                }
+
+                return updated;
               }
 
               if (currentPart && currentPart.type === item.type) {
@@ -543,9 +644,21 @@ const AppContent = ({
                   currentPart.code += item.code;
                 }
               } else {
+                // Mark previous thinking part as complete when switching away
+                if (currentPart && currentPart.type === "thinking") {
+                  currentPart._complete = true;
+                  if (currentPart._startTime) {
+                    currentPart._duration = Math.round((Date.now() - currentPart._startTime) / 1000);
+                  }
+                }
+
                 currentPart = { ...item };
                 if (item.headers) {
                   currentPart.rows = [];
+                }
+                // Add start time for thinking parts
+                if (item.type === "thinking") {
+                  currentPart._startTime = Date.now();
                 }
                 assistantMsg.parts.push(currentPart);
               }
@@ -557,6 +670,23 @@ const AppContent = ({
         });
 
         if (timeoutId) clearTimeout(timeoutId);
+
+        // Mark any in-progress thinking parts as complete with duration
+        setMessages((prev) => {
+          const updated = [...prev];
+          const msg = updated[messageIndex];
+          if (msg?.parts) {
+            msg.parts.forEach((part) => {
+              if (part.type === "thinking" && !part._complete) {
+                part._complete = true;
+                if (part._startTime) {
+                  part._duration = Math.round((Date.now() - part._startTime) / 1000);
+                }
+              }
+            });
+          }
+          return updated;
+        });
 
         if (activeChatId) {
           setMessages((prev) => {

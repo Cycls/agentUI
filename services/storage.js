@@ -131,8 +131,8 @@ export class ChatHistoryManager {
       return "New Chat";
     }
 
-    // Find first user message
-    const firstUserMsg = messages.find((m) => m.type === "request");
+    // Find first user message (supports both old format with type and new format with role)
+    const firstUserMsg = messages.find((m) => m.type === "request" || m.role === "user");
     if (!firstUserMsg) {
       return "New Chat";
     }

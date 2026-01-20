@@ -1,6 +1,6 @@
 import { useCallback, useRef } from "react";
-import { extractAttachmentsFromContent, uploadOne } from "../utils/file";
-import { sendChatMessage, sendCyclsChatMessage } from "../services/api";
+import { uploadOne } from "../utils/file";
+import { sendCyclsChatMessage } from "../services/api";
 import { ChatHistoryManager } from "../services/storage";
 import {
   trackFileUploadStarted,
@@ -148,6 +148,8 @@ export const useChatSend = ({
       try {
         // Track current part for aggregation
         let currentPart = null;
+        // Track steps part separately for aggregation
+        let stepsPart = null;
 
         await sendCyclsChatMessage({
           messages: newMessages,
@@ -168,6 +170,48 @@ export const useChatSend = ({
                 assistantMsg.parts = [];
               }
 
+              // Handle step events - aggregate into a single "steps" part
+              // Steps can stream word-by-word. When `data` arrives, it signals step completion.
+              // Next step event after data starts a new step.
+              if (item.type === "step") {
+                if (!stepsPart) {
+                  stepsPart = { type: "steps", steps: [] };
+                  assistantMsg.parts.push(stepsPart);
+                }
+
+                const lastStep = stepsPart.steps[stepsPart.steps.length - 1];
+
+                // If data is provided, this completes the current step
+                if (item.data !== undefined) {
+                  if (lastStep && !lastStep._complete) {
+                    // Append any remaining step text and mark complete
+                    if (item.step) lastStep.step += item.step;
+                    lastStep.data = item.data;
+                    lastStep._complete = true;
+                  } else {
+                    // New step with data in same event
+                    stepsPart.steps.push({
+                      step: item.step || "",
+                      data: item.data,
+                      _complete: true,
+                    });
+                  }
+                } else if (item.step) {
+                  // No data yet - either append to current incomplete step or start new
+                  if (lastStep && !lastStep._complete) {
+                    lastStep.step += item.step;
+                  } else {
+                    stepsPart.steps.push({
+                      step: item.step,
+                      data: null,
+                      _complete: false,
+                    });
+                  }
+                }
+
+                return updated;
+              }
+
               // Check if we can aggregate with current part
               if (currentPart && currentPart.type === item.type) {
                 // Aggregate based on type
@@ -185,12 +229,25 @@ export const useChatSend = ({
                   currentPart.code += item.code;
                 }
               } else {
+                // Mark previous thinking part as complete when switching away
+                if (currentPart && currentPart.type === "thinking") {
+                  currentPart._complete = true;
+                  if (currentPart._startTime) {
+                    currentPart._duration = Math.round((Date.now() - currentPart._startTime) / 1000);
+                  }
+                }
+
                 // Create new part
                 currentPart = { ...item };
 
                 // Initialize rows array for table headers
                 if (item.headers) {
                   currentPart.rows = [];
+                }
+
+                // Add start time for thinking parts
+                if (item.type === "thinking") {
+                  currentPart._startTime = Date.now();
                 }
 
                 assistantMsg.parts.push(currentPart);
@@ -203,6 +260,23 @@ export const useChatSend = ({
         });
 
         if (timeoutId) clearTimeout(timeoutId);
+
+        // Mark any in-progress thinking parts as complete with duration
+        setMessages((prev) => {
+          const updated = [...prev];
+          const lastMsg = updated[updated.length - 1];
+          if (lastMsg?.parts) {
+            lastMsg.parts.forEach((part) => {
+              if (part.type === "thinking" && !part._complete) {
+                part._complete = true;
+                if (part._startTime) {
+                  part._duration = Math.round((Date.now() - part._startTime) / 1000);
+                }
+              }
+            });
+          }
+          return updated;
+        });
 
         const finalMessages = [...newMessages, newAssistantMessage];
         ChatHistoryManager.updateChat(chatId, finalMessages);
