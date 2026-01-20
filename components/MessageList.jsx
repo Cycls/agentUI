@@ -2,9 +2,9 @@ import React, { useMemo } from "react";
 import { AttachmentPreview } from "./AttachmentPreview";
 import { ErrorMessage } from "./ErrorMessage";
 import { MessageActions } from "./MessageActions";
-import { extractAttachmentsFromContent } from "../utils/file";
-import { MarkdownRenderer } from "./MarkdownRenderer";
 import { PartRenderer } from "./PartRenderer";
+import { MarkdownRenderer } from "./MarkdownRenderer";
+import { extractAttachmentsFromContent } from "../utils/file";
 
 export const MessageList = React.memo(
   ({
@@ -67,14 +67,24 @@ export const MessageList = React.memo(
             );
           }
 
-          // Assistant response - check if it uses new parts format
+          // Assistant response
           const isLastAssistant =
             (message.type === "response" || message.role === "assistant") &&
-            index === messages.length - 1 &&
-            !isGenerating;
+            index === messages.length - 1;
+
+          const isCurrentlyGenerating = isLastAssistant && isGenerating;
 
           const hasParts = message.parts && Array.isArray(message.parts);
           const hasContent = !hasParts && (message.content || message.content === "");
+
+          // Check if message has actual content for showing actions
+          const hasActualContent =
+            (hasParts && message.parts.length > 0 && message.parts.some(p =>
+              (p.type === "text" && p.text) ||
+              (p.type === "code" && p.code) ||
+              (p.type === "table" && p.headers)
+            )) ||
+            (hasContent && message.content && message.content !== "");
 
           return (
             <div key={index} className="flex mb-4 justify-start group">
@@ -88,7 +98,7 @@ export const MessageList = React.memo(
                   />
                 ) : (
                   <>
-                    {/* New format: render parts */}
+                    {/* Render parts directly */}
                     {hasParts && (
                       <div className="space-y-2">
                         {message.parts.map((part, partIndex) => (
@@ -96,13 +106,16 @@ export const MessageList = React.memo(
                             key={partIndex}
                             part={part}
                             onSend={onSend}
+                            isGenerating={isCurrentlyGenerating}
                           />
                         ))}
-                        {message.parts.length === 0 && (
+
+                        {/* Loading placeholder if still generating with no parts */}
+                        {message.parts.length === 0 && isCurrentlyGenerating && (
                           <div
                             className="h-4 w-32 rounded animate-pulse"
                             style={{ backgroundColor: "var(--bg-tertiary)" }}
-                          ></div>
+                          />
                         )}
                       </div>
                     )}
@@ -110,26 +123,22 @@ export const MessageList = React.memo(
                     {/* Old format: render markdown content */}
                     {hasContent && (
                       <div className="prose prose-sm max-w-none">
-                        <MarkdownRenderer
-                          markdown={message.content}
-                          onSend={onSend}
-                        />
-                        {message.content === "" && (
+                        <MarkdownRenderer markdown={message.content} onSend={onSend} />
+                        {message.content === "" && isCurrentlyGenerating && (
                           <div
                             className="h-4 w-32 rounded animate-pulse"
                             style={{ backgroundColor: "var(--bg-tertiary)" }}
-                          ></div>
+                          />
                         )}
                       </div>
                     )}
 
-                    {/* Message Actions - only show if message has content or parts */}
-                    {((hasParts && message.parts.length > 0) ||
-                      (hasContent && message.content && message.content !== "")) && (
+                    {/* Message Actions - only show if message has content and not generating */}
+                    {hasActualContent && !isCurrentlyGenerating && (
                       <MessageActions
                         message={message}
                         onRegenerate={() => onRegenerate(index)}
-                        isLastAssistant={isLastAssistant}
+                        isLastAssistant={isLastAssistant && !isGenerating}
                       />
                     )}
                   </>
