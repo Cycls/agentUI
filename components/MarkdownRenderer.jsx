@@ -148,8 +148,9 @@ const TableComponent = ({ children, ...props }) => {
         )
         .join("\n");
 
-      // Create and download file
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      // Create and download file with UTF-8 BOM for Excel compatibility
+      const BOM = "\uFEFF";
+      const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
