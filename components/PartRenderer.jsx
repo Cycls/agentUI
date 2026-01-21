@@ -175,7 +175,7 @@ function StepsBlock({ steps, onSend }) {
       step.type === "search" ||
       (step.step &&
         (step.step.toLowerCase().includes("search") ||
-          step.step.toLowerCase().includes("result")))
+          step.step.toLowerCase().includes("fetch")))
     );
   };
 
@@ -276,9 +276,14 @@ function StepsBlock({ steps, onSend }) {
                         </span>
                       )}
                       {hasData && (
-                        <span style={{ color: "var(--text-tertiary)" }}>
+                        <button
+                          type="button"
+                          onClick={() => toggleStepData(actualIndex)}
+                          className="p-1 -m-1 hover:opacity-70"
+                          style={{ color: "var(--text-tertiary)" }}
+                        >
                           <ChevronIcon isOpen={isStepExpanded} />
-                        </span>
+                        </button>
                       )}
                     </div>
                   </div>

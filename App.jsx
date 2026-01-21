@@ -387,42 +387,31 @@ const AppContent = ({
                 assistantMsg.parts = [];
               }
 
-              // Handle step events - aggregate into a single "steps" part
-              // Steps can stream word-by-word. When `data` arrives, it signals step completion.
+              // Handle step events - aggregate into current "steps" part
+              // Each step event is treated as a complete step.
+              // A new steps block is created when steps come after a non-step part.
               if (item.type === "step") {
                 if (!stepsPart) {
                   stepsPart = { type: "steps", steps: [] };
                   assistantMsg.parts.push(stepsPart);
                 }
 
-                const lastStep = stepsPart.steps[stepsPart.steps.length - 1];
-
-                if (item.data !== undefined) {
-                  if (lastStep && !lastStep._complete) {
-                    if (item.step) lastStep.step += item.step;
-                    lastStep.data = item.data;
-                    lastStep._complete = true;
-                  } else {
-                    stepsPart.steps.push({
-                      step: item.step || "",
-                      data: item.data,
-                      _complete: true,
-                    });
-                  }
-                } else if (item.step) {
-                  if (lastStep && !lastStep._complete) {
-                    lastStep.step += item.step;
-                  } else {
-                    stepsPart.steps.push({
-                      step: item.step,
-                      data: null,
-                      _complete: false,
-                    });
-                  }
+                // Each step event creates a new step entry
+                if (item.step || item.data !== undefined) {
+                  stepsPart.steps.push({
+                    step: item.step || "",
+                    data: item.data !== undefined ? item.data : null,
+                    result: item.result,
+                    _complete: true,
+                  });
                 }
 
+                currentPart = null;
                 return updated;
               }
+
+              // Non-step part received - reset stepsPart so next steps create a new block
+              stepsPart = null;
 
               if (currentPart && currentPart.type === item.type) {
                 if (item.row) {
@@ -596,42 +585,31 @@ const AppContent = ({
                 assistantMsg.parts = [];
               }
 
-              // Handle step events - aggregate into a single "steps" part
-              // Steps can stream word-by-word. When `data` arrives, it signals step completion.
+              // Handle step events - aggregate into current "steps" part
+              // Each step event is treated as a complete step.
+              // A new steps block is created when steps come after a non-step part.
               if (item.type === "step") {
                 if (!stepsPart) {
                   stepsPart = { type: "steps", steps: [] };
                   assistantMsg.parts.push(stepsPart);
                 }
 
-                const lastStep = stepsPart.steps[stepsPart.steps.length - 1];
-
-                if (item.data !== undefined) {
-                  if (lastStep && !lastStep._complete) {
-                    if (item.step) lastStep.step += item.step;
-                    lastStep.data = item.data;
-                    lastStep._complete = true;
-                  } else {
-                    stepsPart.steps.push({
-                      step: item.step || "",
-                      data: item.data,
-                      _complete: true,
-                    });
-                  }
-                } else if (item.step) {
-                  if (lastStep && !lastStep._complete) {
-                    lastStep.step += item.step;
-                  } else {
-                    stepsPart.steps.push({
-                      step: item.step,
-                      data: null,
-                      _complete: false,
-                    });
-                  }
+                // Each step event creates a new step entry
+                if (item.step || item.data !== undefined) {
+                  stepsPart.steps.push({
+                    step: item.step || "",
+                    data: item.data !== undefined ? item.data : null,
+                    result: item.result,
+                    _complete: true,
+                  });
                 }
 
+                currentPart = null;
                 return updated;
               }
+
+              // Non-step part received - reset stepsPart so next steps create a new block
+              stepsPart = null;
 
               if (currentPart && currentPart.type === item.type) {
                 if (item.row) {
