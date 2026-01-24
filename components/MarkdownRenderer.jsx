@@ -311,16 +311,16 @@ const TableComponent = ({ children, ...props }) => {
 // ───────────────────────────────────────────────────────────────────────────────
 // Markdown Renderer Component
 // ───────────────────────────────────────────────────────────────────────────────
-export const MarkdownRenderer = React.memo(({ markdown, onSend }) => {
+export const MarkdownRenderer = React.memo(({ markdown, onSend, disableImageDownload = false }) => {
   const components = useMemo(
     () => ({
       raw: RawComponent,
       a: (props) => <LinkComponent {...props} onSend={onSend} />,
       code: CodeBlock,
-      img: ImageComponent,
+      img: disableImageDownload ? "img" : ImageComponent,
       table: TableComponent,
     }),
-    [onSend]
+    [onSend, disableImageDownload]
   );
 
   return (
