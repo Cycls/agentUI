@@ -14,7 +14,7 @@ const RawComponent = ({ children }) => (
   <div className="not-prose">{children}</div>
 );
 
-const ImageComponent = ({ src, alt, ...props }) => {
+const ImageComponent = ({ src, alt, id, ...props }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   const handleDownload = useCallback(async () => {
@@ -33,6 +33,10 @@ const ImageComponent = ({ src, alt, ...props }) => {
       console.error("Failed to download image:", error);
     }
   }, [src, alt]);
+
+  if (id === "no_download") {
+    return <img src={src} alt={alt} id={id} {...props} />;
+  }
 
   return (
     <div
