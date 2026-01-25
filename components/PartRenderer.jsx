@@ -58,6 +58,68 @@ function StepDot() {
   );
 }
 
+// Image block with download functionality
+function ImageBlock({ src, alt }) {
+  const [isHovered, setIsHovered] = React.useState(false);
+
+  const handleDownload = React.useCallback(async () => {
+    try {
+      const response = await fetch(src);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = alt || "image";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Failed to download image:", error);
+    }
+  }, [src, alt]);
+
+  return (
+    <div
+      className="relative md:w-[60%] inline-block group"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <img src={src} alt={alt || ""} />
+      {isHovered && (
+        <button
+          onClick={handleDownload}
+          className="absolute top-6 right-2 p-2 rounded-lg transition-all duration-200"
+          style={{
+            backgroundColor: "var(--bg-primary)",
+            border: "1px solid var(--border-primary)",
+            color: "var(--text-primary)",
+            boxShadow: "var(--shadow-md)",
+          }}
+          title="Download image"
+          aria-label="Download image"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+        </button>
+      )}
+    </div>
+  );
+}
+
 // Format seconds to display string (e.g., "5s" or "1m 23s")
 function formatThinkingTime(seconds) {
   if (seconds < 60) {
@@ -74,7 +136,8 @@ function ThinkingBlock({ thinking, onSend, isActive, startTime, duration }) {
   const [elapsed, setElapsed] = React.useState(() => {
     // Initialize with duration if available (from saved state)
     if (duration != null) return duration;
-    if (startTime && !isActive) return Math.round((Date.now() - startTime) / 1000);
+    if (startTime && !isActive)
+      return Math.round((Date.now() - startTime) / 1000);
     return 0;
   });
 
@@ -345,6 +408,11 @@ export const PartRenderer = React.memo(function PartRenderer({
   // Handle steps type (aggregated steps array)
   if (part.type === "steps") {
     return <StepsBlock steps={part.steps || []} onSend={onSend} />;
+  }
+
+  // Handle image type with native download UI (format: {type: "image", image: "url"})
+  if (part.type === "image" && part.image) {
+    return <ImageBlock src={part.image} alt={part.alt} />;
   }
 
   // For all other types, convert to markdown and use MarkdownRenderer
