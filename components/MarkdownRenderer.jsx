@@ -14,71 +14,6 @@ const RawComponent = ({ children }) => (
   <div className="not-prose">{children}</div>
 );
 
-const ImageComponent = ({ src, alt, id, ...props }) => {
-  const [isHovered, setIsHovered] = useState(false);
-
-  const handleDownload = useCallback(async () => {
-    try {
-      const response = await fetch(src);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = alt || "image";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Failed to download image:", error);
-    }
-  }, [src, alt]);
-
-  if (id === "no_download") {
-    return <img src={src} alt={alt} id={id} {...props} />;
-  }
-
-  return (
-    <div
-      className="relative inline-block group"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <img src={src} alt={alt} {...props} />
-      {isHovered && (
-        <button
-          onClick={handleDownload}
-          className="absolute top-8 right-2 p-2 rounded-lg transition-all duration-200"
-          style={{
-            backgroundColor: "var(--bg-primary)",
-            border: "1px solid var(--border-primary)",
-            color: "var(--text-primary)",
-            boxShadow: "var(--shadow-md)",
-          }}
-          title="Download image"
-          aria-label="Download image"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="7 10 12 15 17 10" />
-            <line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
-        </button>
-      )}
-    </div>
-  );
-};
-
 const LinkComponent = ({ href, onSend, ...props }) => {
   const handleClick = useCallback(
     (e) => {
@@ -311,16 +246,15 @@ const TableComponent = ({ children, ...props }) => {
 // ───────────────────────────────────────────────────────────────────────────────
 // Markdown Renderer Component
 // ───────────────────────────────────────────────────────────────────────────────
-export const MarkdownRenderer = React.memo(({ markdown, onSend, disableImageDownload = false }) => {
+export const MarkdownRenderer = React.memo(({ markdown, onSend }) => {
   const components = useMemo(
     () => ({
       raw: RawComponent,
       a: (props) => <LinkComponent {...props} onSend={onSend} />,
       code: CodeBlock,
-      img: disableImageDownload ? "img" : ImageComponent,
       table: TableComponent,
     }),
-    [onSend, disableImageDownload]
+    [onSend]
   );
 
   return (
