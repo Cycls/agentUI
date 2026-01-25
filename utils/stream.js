@@ -101,7 +101,11 @@ function stripThinkTags(s) {
 // ───────────────────────────────────────────────────────────────────────────────
 // Cycls SSE Stream Reader
 // ───────────────────────────────────────────────────────────────────────────────
-async function readCyclsSSEStream(response, onPart, { signal } = {}) {
+
+// Content types that get rendered - everything else is metadata
+const CONTENT_TYPES = ['text', 'thinking', 'code', 'table', 'callout', 'image', 'step', 'steps'];
+
+async function readCyclsSSEStream(response, onPart, { signal, onMeta } = {}) {
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
@@ -134,7 +138,17 @@ async function readCyclsSSEStream(response, onPart, { signal } = {}) {
 
         try {
           const payload = JSON.parse(data);
-          onPart(payload);
+
+          // Separate content from metadata
+          if (payload.type && !CONTENT_TYPES.includes(payload.type)) {
+            // This is metadata - pass to onMeta callback if provided
+            if (onMeta) {
+              onMeta(payload);
+            }
+          } else {
+            // This is renderable content
+            onPart(payload);
+          }
         } catch (e) {
           console.error("Failed to parse SSE payload:", e, data);
         }

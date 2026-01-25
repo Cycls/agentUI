@@ -133,6 +133,8 @@ export async function sendCyclsChatMessage({
   setActive,
   org,
   onPart,
+  onMeta,
+  meta,
   signal,
 }) {
   const context = messages.map(({ role, content, parts }) => {
@@ -244,10 +246,15 @@ export async function sendCyclsChatMessage({
     }
   }
 
+  const body = { messages: context };
+  if (meta && Object.keys(meta).length > 0) {
+    body.meta = meta;
+  }
+
   const response = await fetch("/chat/cycls", {
     method: "POST",
     headers,
-    body: JSON.stringify({ messages: context }),
+    body: JSON.stringify(body),
     signal,
   });
 
@@ -274,5 +281,5 @@ export async function sendCyclsChatMessage({
     };
   }
 
-  await readCyclsSSEStream(response, onPart, { signal });
+  await readCyclsSSEStream(response, onPart, { signal, onMeta });
 }
