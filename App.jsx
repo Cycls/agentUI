@@ -835,7 +835,7 @@ const AppContent = ({
 
           {/* Header */}
           <div className="prose m-2 mx-auto max-w-3xl p-2 prose-pre:p-0 pt-14 md:pt-2">
-            <MarkdownRenderer markdown={HEADER} onSend={send} disableImageDownload />
+            <MarkdownRenderer markdown={HEADER} onSend={send} />
           </div>
 
           {!empty && (
@@ -858,7 +858,7 @@ const AppContent = ({
 
           {empty && !hasBegun && INTRO && INTRO.trim() !== "" && (
             <div className="mx-auto max-w-3xl prose prose-sm prose-pre:p-0">
-              <MarkdownRenderer markdown={INTRO} onSend={send} disableImageDownload />
+              <MarkdownRenderer markdown={INTRO} onSend={send} />
             </div>
           )}
         </div>
