@@ -139,18 +139,8 @@ export async function sendCyclsChatMessage({
     // Handle new format (role + parts/content)
     if (role) {
       if (parts) {
-        // Assistant message with parts - convert back to text
-        const textParts = parts
-          .map((p) => {
-            if (p.type === "text") return p.text;
-            if (p.type === "thinking")
-              return `<thinking>${p.thinking}</thinking>`;
-            if (p.type === "code")
-              return "```" + (p.language || "") + "\n" + p.code + "\n```";
-            return "";
-          })
-          .join("\n\n");
-        return { role, content: textParts };
+        // Assistant message with parts - keep as-is
+        return { role, parts };
       }
       // User message or plain content
       const { clean, attachments: msgAttachments } =
