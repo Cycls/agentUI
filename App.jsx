@@ -153,7 +153,6 @@ const AppContent = ({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
   const [activeChatId, setActiveChatId] = useState(null);
-  const [meta, setMeta] = useState({});
 
   // Get responsive sidebar width
   const sidebarWidth = useSidebarWidth(isSidebarOpen);
@@ -273,15 +272,12 @@ const AppContent = ({
     setActiveChatId,
     onMessageSuccess: handleMessageSuccess,
     analyticsEnabled,
-    meta,
-    setMeta,
   });
 
   const handleNewChat = useCallback(() => {
     setMessages([]);
     setActiveChatId(null);
     setHasBegun(false);
-    setMeta({});
     ChatHistoryManager.setActiveChat("");
     window.scrollTo(0, 0);
     if (analyticsEnabled) trackNewChatStarted();
@@ -294,7 +290,6 @@ const AppContent = ({
         setMessages(chat.messages);
         setActiveChatId(chatId);
         setHasBegun(chat.messages.length > 0);
-        setMeta({});
         ChatHistoryManager.setActiveChat(chatId);
         if (window.innerWidth < 768) {
           setIsSidebarOpen(false);
@@ -381,13 +376,6 @@ const AppContent = ({
           getToken: authApi?.getToken,
           setActive: clerkApi?.setActive,
           org: ORG,
-          meta,
-          onMeta: (data) => {
-            setMeta((prev) => ({
-              ...prev,
-              [data.type]: data,
-            }));
-          },
           onPart: (item) => {
             resetTimeout();
 
@@ -530,8 +518,6 @@ const AppContent = ({
       clerkApi?.setActive,
       activeChatId,
       analyticsEnabled,
-      meta,
-      setMeta,
     ]
   );
 
@@ -588,13 +574,6 @@ const AppContent = ({
           getToken: authApi?.getToken,
           setActive: clerkApi?.setActive,
           org: ORG,
-          meta,
-          onMeta: (data) => {
-            setMeta((prev) => ({
-              ...prev,
-              [data.type]: data,
-            }));
-          },
           onPart: (item) => {
             resetTimeout();
 
@@ -740,8 +719,6 @@ const AppContent = ({
       clerkApi?.setActive,
       activeChatId,
       analyticsEnabled,
-      meta,
-      setMeta,
     ]
   );
 
