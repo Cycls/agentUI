@@ -31,8 +31,6 @@ export const useChatSend = ({
   setActiveChatId,
   onMessageSuccess,
   analyticsEnabled,
-  meta,
-  setMeta,
 }) => {
   const abortControllerRef = useRef(null);
 
@@ -159,13 +157,6 @@ export const useChatSend = ({
           getToken,
           setActive,
           org,
-          meta,
-          onMeta: (data) => {
-            setMeta((prev) => ({
-              ...prev,
-              [data.type]: data,
-            }));
-          },
           onPart: (item) => {
             // Reset timeout on every chunk received
             resetTimeout();
@@ -369,8 +360,6 @@ export const useChatSend = ({
       setUploadProgress,
       setIsUserScrolled,
       onFirstSend,
-      meta,
-      setMeta,
     ]
   );
 
