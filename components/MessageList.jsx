@@ -4,6 +4,7 @@ import { ErrorMessage } from "./ErrorMessage";
 import { MessageActions } from "./MessageActions";
 import { PartRenderer } from "./PartRenderer";
 import { MarkdownRenderer } from "./MarkdownRenderer";
+import { StreamingIndicator } from "./StreamingIndicator";
 import { extractAttachmentsFromContent } from "../utils/file";
 
 export const MessageList = React.memo(
@@ -110,13 +111,8 @@ export const MessageList = React.memo(
                           />
                         ))}
 
-                        {/* Loading placeholder if still generating with no parts */}
-                        {message.parts.length === 0 && isCurrentlyGenerating && (
-                          <div
-                            className="h-4 w-32 rounded animate-pulse"
-                            style={{ backgroundColor: "var(--bg-tertiary)" }}
-                          />
-                        )}
+                        {/* Streaming indicator while generating */}
+                        {isCurrentlyGenerating && <StreamingIndicator />}
                       </div>
                     )}
 
@@ -124,12 +120,7 @@ export const MessageList = React.memo(
                     {hasContent && (
                       <div className="prose prose-sm max-w-none">
                         <MarkdownRenderer markdown={message.content} onSend={onSend} />
-                        {message.content === "" && isCurrentlyGenerating && (
-                          <div
-                            className="h-4 w-32 rounded animate-pulse"
-                            style={{ backgroundColor: "var(--bg-tertiary)" }}
-                          />
-                        )}
+                        {isCurrentlyGenerating && <StreamingIndicator />}
                       </div>
                     )}
 
