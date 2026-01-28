@@ -26,6 +26,13 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.58.1",
+    "@tiptap/extension-placeholder": "^3.17.1",
+    "@tiptap/extension-typography": "^3.17.1",
+    "@tiptap/pm": "^3.17.1",
+    "@tiptap/react": "^3.17.1",
+    "@tiptap/starter-kit": "^3.17.1",
+    "html-to-docx": "^1.8.0",
+    "jspdf": "^4.0.0",
     "posthog-js": "^1.306.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

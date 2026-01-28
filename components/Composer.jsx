@@ -11,6 +11,8 @@ export const Composer = ({
   disabled = false,
   onUpgradeClick,
   sidebarWidth = 0,
+  canvasOpen = false,
+  canvasWidthPercent = 0,
 }) => {
   const [message, setMessage] = useState("");
   const [files, setFiles] = useState([]);
@@ -229,11 +231,12 @@ export const Composer = ({
         </div>
       )}
 
-      {/* Fixed composer container with sidebar-aware positioning */}
+      {/* Fixed composer container with sidebar and canvas-aware positioning */}
       <div
-        className="fixed right-0 z-40 transition-all duration-300 ease-in-out bottom-[max(0.75rem,env(safe-area-inset-bottom))] md:bottom-[max(1rem,env(safe-area-inset-bottom))]"
+        className="fixed z-40 transition-all duration-300 ease-in-out bottom-[max(0.75rem,env(safe-area-inset-bottom))] md:bottom-[max(1rem,env(safe-area-inset-bottom))]"
         style={{
           left: isMobile ? "0px" : `${sidebarWidth}px`,
+          right: canvasOpen && !isMobile ? `${canvasWidthPercent}%` : "0px",
         }}
       >
         <div className="mx-auto max-w-3xl px-3 md:px-4">
