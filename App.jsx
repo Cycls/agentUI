@@ -387,7 +387,7 @@ const AppContent = ({
         timeoutId = setTimeout(() => {
           isTimeout = true;
           ctrl.abort();
-        }, 120000);
+        }, 300000);
       };
 
       resetTimeout();
@@ -585,7 +585,7 @@ const AppContent = ({
         timeoutId = setTimeout(() => {
           isTimeout = true;
           ctrl.abort();
-        }, 120000);
+        }, 300000);
       };
 
       resetTimeout();

@@ -140,7 +140,7 @@ export const useChatSend = ({
             isTimeout = true;
             abortControllerRef.current.abort();
           }
-        }, 120000);
+        }, 300000);
       };
 
       // Set initial timeout
