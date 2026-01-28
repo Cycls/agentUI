@@ -31,6 +31,7 @@ export const useChatSend = ({
   setActiveChatId,
   onMessageSuccess,
   analyticsEnabled,
+  onCanvasEvent,
 }) => {
   const abortControllerRef = useRef(null);
 
@@ -150,6 +151,8 @@ export const useChatSend = ({
         let currentPart = null;
         // Track steps part separately for aggregation
         let stepsPart = null;
+        // Track canvas part for aggregation
+        let canvasPart = null;
 
         await sendCyclsChatMessage({
           messages: newMessages,
@@ -160,6 +163,49 @@ export const useChatSend = ({
           onPart: (item) => {
             // Reset timeout on every chunk received
             resetTimeout();
+
+            // Handle canvas events - dispatch to context AND store in message parts
+            if (item.type === "canvas") {
+              // Dispatch to canvas context for real-time streaming UI
+              if (onCanvasEvent) {
+                onCanvasEvent(item);
+              }
+
+              // Also store in message parts for persistence
+              setMessages((prev) => {
+                const updated = [...prev];
+                const assistantMsg = updated[updated.length - 1];
+
+                if (!assistantMsg.parts) {
+                  assistantMsg.parts = [];
+                }
+
+                // Create new canvas part on open
+                if (item.open === true) {
+                  canvasPart = {
+                    type: "canvas",
+                    title: item.title || "Untitled",
+                    content: "",
+                    _complete: false,
+                  };
+                  assistantMsg.parts.push(canvasPart);
+                }
+
+                // Append content to existing canvas part
+                if (item.content && canvasPart) {
+                  canvasPart.content += item.content;
+                }
+
+                // Mark complete when done
+                if (item.done === true && canvasPart) {
+                  canvasPart._complete = true;
+                }
+
+                return updated;
+              });
+
+              return;
+            }
 
             setMessages((prev) => {
               const updated = [...prev];
@@ -360,6 +406,7 @@ export const useChatSend = ({
       setUploadProgress,
       setIsUserScrolled,
       onFirstSend,
+      onCanvasEvent,
     ]
   );
 
