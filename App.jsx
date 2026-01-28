@@ -29,6 +29,9 @@ import {
   useSubscriptionContext,
   SubscriptionProvider,
 } from "./contexts/SubscriptionContext";
+import { CanvasProvider, useCanvas } from "./contexts/CanvasContext";
+import { CanvasPanel } from "./components/Canvas";
+import { useCanvasWidth } from "./hooks/useCanvasWidth";
 
 import { useChatSend } from "./hooks/useChatSend";
 import { useSidebarWidth } from "./hooks/useSidebarWidth";
@@ -115,10 +118,14 @@ const AppWithAuth = ({ HEADER, INTRO, AUTH, ORG, TITLE, TIER }) => {
 //  Main App Component
 // ═══════════════════════════════════════════════════════════════════════════════
 export const App = (props) => {
-  return props.AUTH ? (
-    <AppWithAuth {...props} />
-  ) : (
-    <AppWithoutAuth {...props} />
+  return (
+    <CanvasProvider>
+      {props.AUTH ? (
+        <AppWithAuth {...props} />
+      ) : (
+        <AppWithoutAuth {...props} />
+      )}
+    </CanvasProvider>
   );
 };
 
@@ -140,6 +147,8 @@ const AppContent = ({
   subscriptionError,
 }) => {
   const analyticsEnabled = useAnalytics();
+  const { state: canvasState, openCanvas, appendContent, markDone, closeCanvas } = useCanvas();
+  const { chatWidthPercent, isMobile: isCanvasMobile } = useCanvasWidth(canvasState.isOpen);
 
   const [messages, setMessages] = useState([]);
   const [shouldFocus, setShouldFocus] = useState(false);
@@ -256,6 +265,22 @@ const AppContent = ({
     }
   }, [AUTH, TIER, isOnPaidPlan, FREE_MESSAGE_LIMIT, analyticsEnabled]);
 
+  // Handle canvas events from streaming
+  const handleCanvasEvent = useCallback((item) => {
+    if (item.open === true) {
+      openCanvas({ title: item.title || "Untitled" });
+    }
+    if (item.content) {
+      appendContent(item.content);
+    }
+    if (item.done === true) {
+      markDone();
+    }
+    if (item.open === false) {
+      closeCanvas();
+    }
+  }, [openCanvas, appendContent, markDone, closeCanvas]);
+
   const { send, handleStop } = useChatSend({
     messages,
     setMessages,
@@ -272,6 +297,7 @@ const AppContent = ({
     setActiveChatId,
     onMessageSuccess: handleMessageSuccess,
     analyticsEnabled,
+    onCanvasEvent: handleCanvasEvent,
   });
 
   const handleNewChat = useCallback(() => {
@@ -779,10 +805,15 @@ const AppContent = ({
         tier={TIER || "Pro"}
       />
 
-      {/* Main content area - slides based on sidebar state */}
+      {/* Main content area - slides based on sidebar state and canvas */}
       <main
         className="min-h-screen transition-all duration-300 ease-in-out"
-        style={{ marginLeft: `${sidebarWidth}px` }}
+        style={{
+          marginLeft: `${sidebarWidth}px`,
+          width: canvasState.isOpen && !isCanvasMobile
+            ? `calc(${chatWidthPercent}% - ${sidebarWidth}px)`
+            : `calc(100% - ${sidebarWidth}px)`,
+        }}
       >
         <div className="p-10">
           {/* Top-right actions: Theme toggle + Home link */}
@@ -864,7 +895,10 @@ const AppContent = ({
         </div>
       </main>
 
-      {/* Composer - positioned fixed with sidebar awareness */}
+      {/* Document Canvas Panel */}
+      <CanvasPanel />
+
+      {/* Composer - positioned fixed with sidebar and canvas awareness */}
       <Composer
         onSend={send}
         isLoading={isLoading}
@@ -872,6 +906,8 @@ const AppContent = ({
         disabled={hasReachedFreeLimit}
         onUpgradeClick={handleUpgradeClick}
         sidebarWidth={sidebarWidth}
+        canvasOpen={canvasState.isOpen}
+        canvasWidthPercent={canvasState.isOpen && !isCanvasMobile ? 100 - chatWidthPercent : 0}
       />
     </div>
   );
