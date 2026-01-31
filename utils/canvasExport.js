@@ -52,7 +52,7 @@ function markdownToHtml(markdown) {
   // Wrap in paragraph
   html = "<p>" + html + "</p>";
   html = html.replace(/<p><\/p>/g, "");
-  html = html.replace(/(<li>.*?<\/li>)+/gs, (match) => `<ul>${match}</ul>`);
+  html = html.replace(/(<li>[\s\S]*?<\/li>)+/g, (match) => `<ul>${match}</ul>`);
 
   return html;
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -53,8 +53,8 @@ function markdownToHtml(markdown) {
   // Clean up empty paragraphs
   html = html.replace(/<p><\/p>/g, "");
 
-  // Wrap consecutive li elements in ul
-  html = html.replace(/(<li>.*?<\/li>)+/gs, (match) => `<ul>${match}</ul>`);
+  // Wrap consecutive li elements in ul (avoid 's' flag for Safari compatibility)
+  html = html.replace(/(<li>[\s\S]*?<\/li>)+/g, (match) => `<ul>${match}</ul>`);
 
   return html;
 }
@@ -75,7 +75,7 @@ function detectRTL(text) {
 // Canvas Editor - Tiptap integration
 // ───────────────────────────────────────────────────────────────────────────────
 export const CanvasEditor = () => {
-  const { state, updateContent } = useCanvas();
+  const { state } = useCanvas();
   const lastContentRef = useRef(state.content);
   const isRTL = useMemo(() => detectRTL(state.content), [state.content]);
 
@@ -99,46 +99,73 @@ export const CanvasEditor = () => {
         dir: isRTL ? "rtl" : "ltr",
       },
     },
-    onUpdate: ({ editor }) => {
-      // Only sync back for user edits (when not streaming)
-      if (!state.isStreaming && state.isDone) {
-        // Convert HTML back to markdown-ish text for storage
-        // This is a simplified version - real implementation would need proper HTML to MD conversion
-        const html = editor.getHTML();
-        // Store the HTML directly for now since we're working with Tiptap
-        // updateContent could be enhanced to handle HTML
-      }
+    onUpdate: () => {
+      // User edits are tracked by Tiptap internally
+      // Could be enhanced to sync back to context if needed
     },
   });
 
   // Update editor content when streaming new content
   useEffect(() => {
-    if (editor && state.isStreaming && state.content !== lastContentRef.current) {
-      const html = markdownToHtml(state.content);
-      editor.commands.setContent(html);
-      lastContentRef.current = state.content;
+    if (!editor || editor.isDestroyed) return;
 
-      // Scroll to bottom while streaming
-      const editorElement = editor.view.dom;
-      if (editorElement) {
-        editorElement.scrollTop = editorElement.scrollHeight;
+    if (state.isStreaming && state.content !== lastContentRef.current) {
+      try {
+        const html = markdownToHtml(state.content);
+        editor.commands.setContent(html);
+        lastContentRef.current = state.content;
+
+        // Scroll to bottom while streaming
+        const editorElement = editor.view?.dom;
+        if (editorElement) {
+          editorElement.scrollTop = editorElement.scrollHeight;
+        }
+      } catch (e) {
+        console.error("Error updating editor content:", e);
       }
     }
   }, [editor, state.content, state.isStreaming]);
 
   // Update editable state when streaming completes
   useEffect(() => {
-    if (editor) {
+    if (!editor || editor.isDestroyed) return;
+
+    try {
       editor.setEditable(!state.isStreaming);
+    } catch (e) {
+      console.error("Error setting editable state:", e);
     }
   }, [editor, state.isStreaming]);
 
   // Update RTL direction when content changes
   useEffect(() => {
-    if (editor) {
-      editor.view.dom.setAttribute("dir", isRTL ? "rtl" : "ltr");
+    if (!editor || editor.isDestroyed) return;
+
+    try {
+      const dom = editor.view?.dom;
+      if (dom) {
+        dom.setAttribute("dir", isRTL ? "rtl" : "ltr");
+      }
+    } catch (e) {
+      console.error("Error setting RTL direction:", e);
     }
   }, [editor, isRTL]);
+
+  // Don't render until editor is ready
+  if (!editor) {
+    return (
+      <div
+        className="flex-1 overflow-y-auto scrollbar-thin canvas-editor"
+        style={{ backgroundColor: "var(--bg-primary)" }}
+      >
+        <div className="p-6 max-w-3xl mx-auto">
+          <div className="min-h-[calc(100vh-120px)] flex items-center justify-center">
+            <span style={{ color: "var(--text-tertiary)" }}>Loading...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
