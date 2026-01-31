@@ -33,7 +33,6 @@
     "@tiptap/starter-kit": "^3.17.1",
     "docx": "^9.5.1",
     "file-saver": "^2.0.5",
-    "html-to-docx": "^1.8.0",
     "jspdf": "^4.0.0",
     "posthog-js": "^1.306.2",
     "react": "^19.1.0",
