@@ -120,11 +120,7 @@ const AppWithAuth = ({ HEADER, INTRO, AUTH, ORG, TITLE, TIER }) => {
 export const App = (props) => {
   return (
     <CanvasProvider>
-      {props.AUTH ? (
-        <AppWithAuth {...props} />
-      ) : (
-        <AppWithoutAuth {...props} />
-      )}
+      {props.AUTH ? <AppWithAuth {...props} /> : <AppWithoutAuth {...props} />}
     </CanvasProvider>
   );
 };
@@ -147,8 +143,16 @@ const AppContent = ({
   subscriptionError,
 }) => {
   const analyticsEnabled = useAnalytics();
-  const { state: canvasState, openCanvas, appendContent, markDone, closeCanvas } = useCanvas();
-  const { chatWidthPercent, isMobile: isCanvasMobile } = useCanvasWidth(canvasState.isOpen);
+  const {
+    state: canvasState,
+    openCanvas,
+    appendContent,
+    markDone,
+    closeCanvas,
+  } = useCanvas();
+  const { chatWidthPercent, isMobile: isCanvasMobile } = useCanvasWidth(
+    canvasState.isOpen
+  );
 
   const [messages, setMessages] = useState([]);
   const [shouldFocus, setShouldFocus] = useState(false);
@@ -266,20 +270,23 @@ const AppContent = ({
   }, [AUTH, TIER, isOnPaidPlan, FREE_MESSAGE_LIMIT, analyticsEnabled]);
 
   // Handle canvas events from streaming
-  const handleCanvasEvent = useCallback((item) => {
-    if (item.open === true) {
-      openCanvas({ title: item.title || "Untitled" });
-    }
-    if (item.content) {
-      appendContent(item.content);
-    }
-    if (item.done === true) {
-      markDone();
-    }
-    if (item.open === false) {
-      closeCanvas();
-    }
-  }, [openCanvas, appendContent, markDone, closeCanvas]);
+  const handleCanvasEvent = useCallback(
+    (item) => {
+      if (item.open === true) {
+        openCanvas({ title: item.title || "Untitled" });
+      }
+      if (item.content) {
+        appendContent(item.content);
+      }
+      if (item.done === true) {
+        markDone();
+      }
+      if (item.open === false) {
+        closeCanvas();
+      }
+    },
+    [openCanvas, appendContent, markDone, closeCanvas]
+  );
 
   const { send, handleStop } = useChatSend({
     messages,
@@ -454,7 +461,9 @@ const AppContent = ({
                 if (currentPart && currentPart.type === "thinking") {
                   currentPart._complete = true;
                   if (currentPart._startTime) {
-                    currentPart._duration = Math.round((Date.now() - currentPart._startTime) / 1000);
+                    currentPart._duration = Math.round(
+                      (Date.now() - currentPart._startTime) / 1000
+                    );
                   }
                 }
 
@@ -486,7 +495,9 @@ const AppContent = ({
               if (part.type === "thinking" && !part._complete) {
                 part._complete = true;
                 if (part._startTime) {
-                  part._duration = Math.round((Date.now() - part._startTime) / 1000);
+                  part._duration = Math.round(
+                    (Date.now() - part._startTime) / 1000
+                  );
                 }
               }
             });
@@ -652,7 +663,9 @@ const AppContent = ({
                 if (currentPart && currentPart.type === "thinking") {
                   currentPart._complete = true;
                   if (currentPart._startTime) {
-                    currentPart._duration = Math.round((Date.now() - currentPart._startTime) / 1000);
+                    currentPart._duration = Math.round(
+                      (Date.now() - currentPart._startTime) / 1000
+                    );
                   }
                 }
 
@@ -684,7 +697,9 @@ const AppContent = ({
               if (part.type === "thinking" && !part._complete) {
                 part._complete = true;
                 if (part._startTime) {
-                  part._duration = Math.round((Date.now() - part._startTime) / 1000);
+                  part._duration = Math.round(
+                    (Date.now() - part._startTime) / 1000
+                  );
                 }
               }
             });
@@ -810,19 +825,20 @@ const AppContent = ({
         className="min-h-screen transition-all duration-300 ease-in-out"
         style={{
           marginLeft: `${sidebarWidth}px`,
-          width: canvasState.isOpen && !isCanvasMobile
-            ? `calc(${chatWidthPercent}% - ${sidebarWidth}px)`
-            : `calc(100% - ${sidebarWidth}px)`,
+          width:
+            canvasState.isOpen && !isCanvasMobile
+              ? `calc(${chatWidthPercent}% - ${sidebarWidth}px)`
+              : `calc(100% - ${sidebarWidth}px)`,
         }}
       >
         <div className="p-10">
           {/* Top-right actions: Theme toggle + Home link */}
-          <div className="fixed max-sm:top-[2%] max-sm:right-1 top-1 right-4 flex items-center gap-1 z-20">
+          <div className="fixed max-sm:top-[2%] max-sm:right-3 top-1 right-4 flex items-center gap-2 z-20">
             {/* Theme Toggle */}
-            <ThemeToggle />
+            <ThemeToggle className="max-sm:bg-[var(--bg-primary)] max-sm:shadow-sm max-sm:border max-sm:border-[var(--border-color)]" />
 
             {/* Home button */}
-            {AUTH && (
+            {!AUTH && (
               <a
                 href="https://cycls.ai/"
                 type="button"
@@ -834,6 +850,7 @@ const AppContent = ({
                 active:bg-[var(--bg-active)]
                 transition-colors
                 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]/20
+                max-sm:bg-[var(--bg-primary)] max-sm:shadow-sm max-sm:border max-sm:border-[var(--border-color)]
               "
                 style={{ color: "var(--text-primary)" }}
               >
@@ -907,7 +924,9 @@ const AppContent = ({
         onUpgradeClick={handleUpgradeClick}
         sidebarWidth={sidebarWidth}
         canvasOpen={canvasState.isOpen}
-        canvasWidthPercent={canvasState.isOpen && !isCanvasMobile ? 100 - chatWidthPercent : 0}
+        canvasWidthPercent={
+          canvasState.isOpen && !isCanvasMobile ? 100 - chatWidthPercent : 0
+        }
       />
     </div>
   );
