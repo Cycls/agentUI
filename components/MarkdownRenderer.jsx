@@ -89,7 +89,9 @@ const TableComponent = ({ children, ...props }) => {
 
       // Create and download file with UTF-8 BOM for Excel compatibility
       const BOM = "\uFEFF";
-      const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" });
+      const blob = new Blob([BOM + csvContent], {
+        type: "text/csv;charset=utf-8;",
+      });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -268,7 +270,7 @@ export const MarkdownRenderer = React.memo(({ markdown, onSend }) => {
           [rehypeHighlight, { ignoreMissing: true, detect: true }],
         ]}
       >
-        {markdown}
+        {markdown?.replace(/[\u200B-\u200D\uFEFF]/g, "") ?? ""}
       </Markdown>
     </div>
   );
