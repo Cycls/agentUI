@@ -1,6 +1,6 @@
 import { AttachmentChip } from "./AttachmentChip";
 import { FileErrorToast } from "./Toast";
-import { formatFileSize, validateFile } from "../utils/file";
+import { formatFileSize, validateFile, uploadOne } from "../utils/file";
 import { CONFIG } from "../clientConfig";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -13,9 +13,12 @@ export const Composer = ({
   sidebarWidth = 0,
   canvasOpen = false,
   canvasWidthPercent = 0,
+  getToken,
 }) => {
   const [message, setMessage] = useState("");
+  // Files with upload status: { id, file, status: 'uploading'|'complete'|'error', metadata, error }
   const [files, setFiles] = useState([]);
+  const fileIdCounter = useRef(0);
   const [isMobile, setIsMobile] = useState(false);
   const [fileError, setFileError] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -30,7 +33,30 @@ export const Composer = ({
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  // Handle file validation and adding
+  // Upload a single file and update its status
+  const uploadFile = useCallback(
+    async (fileEntry) => {
+      try {
+        const metadata = await uploadOne(fileEntry.file, getToken);
+        setFiles((prev) =>
+          prev.map((f) =>
+            f.id === fileEntry.id ? { ...f, status: "complete", metadata } : f
+          )
+        );
+      } catch (err) {
+        setFiles((prev) =>
+          prev.map((f) =>
+            f.id === fileEntry.id
+              ? { ...f, status: "error", error: err.message }
+              : f
+          )
+        );
+      }
+    },
+    [getToken]
+  );
+
+  // Handle file validation and adding - starts upload immediately
   const addFiles = useCallback(
     (newFiles) => {
       if (disabled) return;
@@ -42,7 +68,11 @@ export const Composer = ({
           setFileError(validation.error);
           break;
         } else {
-          validFiles.push(file);
+          const id = ++fileIdCounter.current;
+          const fileEntry = { id, file, status: "uploading", metadata: null, error: null };
+          validFiles.push(fileEntry);
+          // Start upload immediately
+          uploadFile(fileEntry);
         }
       }
 
@@ -50,7 +80,7 @@ export const Composer = ({
         setFiles((prev) => [...prev, ...validFiles]);
       }
     },
-    [disabled]
+    [disabled, uploadFile]
   );
 
   // Drag and drop handlers
@@ -146,12 +176,20 @@ export const Composer = ({
     e.target.value = "";
   };
 
-  const removeFile = (i) =>
-    setFiles((prev) => prev.filter((_, idx) => idx !== i));
+  const removeFile = (id) =>
+    setFiles((prev) => prev.filter((f) => f.id !== id));
+
+  // Check if any files are still uploading
+  const hasUploadingFiles = files.some((f) => f.status === "uploading");
+  // Get successfully uploaded attachments
+  const completedAttachments = files
+    .filter((f) => f.status === "complete" && f.metadata)
+    .map((f) => f.metadata);
 
   const handleSend = async () => {
-    if (isLoading || disabled) return;
-    onSend({ text: message, files });
+    if (isLoading || disabled || hasUploadingFiles) return;
+    // Only send completed attachments (already uploaded)
+    onSend({ text: message, attachments: completedAttachments });
     setMessage("");
     setFiles([]);
   };
@@ -162,7 +200,8 @@ export const Composer = ({
       !e.shiftKey &&
       !isMobile &&
       !isLoading &&
-      !disabled
+      !disabled &&
+      !hasUploadingFiles
     ) {
       e.preventDefault();
       handleSend();
@@ -252,11 +291,13 @@ export const Composer = ({
             {files.length > 0 && (
               <div className="px-3 pt-3">
                 <div className="flex flex-wrap gap-2">
-                  {files.map((file, i) => (
+                  {files.map((fileEntry) => (
                     <AttachmentChip
-                      key={i}
-                      file={file}
-                      onRemove={() => removeFile(i)}
+                      key={fileEntry.id}
+                      file={fileEntry.file}
+                      status={fileEntry.status}
+                      error={fileEntry.error}
+                      onRemove={() => removeFile(fileEntry.id)}
                     />
                   ))}
                 </div>
@@ -386,7 +427,7 @@ export const Composer = ({
                 {!isLoading && !disabled && (
                   <button
                     onClick={handleSend}
-                    disabled={isLoading}
+                    disabled={isLoading || hasUploadingFiles}
                     className="rounded-full hover:opacity-90 active:scale-[0.98] inline-flex items-center justify-center w-9 h-9 flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 theme-transition"
                     style={{
                       backgroundColor: "var(--btn-primary-bg)",
