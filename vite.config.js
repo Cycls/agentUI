@@ -14,11 +14,9 @@ export default defineConfig({
         target: "http://127.0.0.1:8080", // <-- use the host/port your agent prints
         changeOrigin: true,
       },
-      "/files": {
-        target: "https://cfywthfcvbajcekvwajz.supabase.co/functions/v1",
+      "/attachments": {
+        target: "http://127.0.0.1:8080", // <-- use the host/port your agent prints
         changeOrigin: true,
-        secure: true,
-        rewrite: (p) => p.replace(/^\/files/, ""), // "/files/upload" → "/upload"
       },
     },
   },
