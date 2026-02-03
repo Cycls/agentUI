@@ -838,7 +838,7 @@ const AppContent = ({
             <ThemeToggle className="max-sm:bg-[var(--bg-primary)] max-sm:shadow-sm max-sm:border max-sm:border-[var(--border-color)]" />
 
             {/* Home button */}
-            {AUTH && (
+            {TIER === "cycls_pass" && (
               <a
                 href="https://cycls.ai/"
                 type="button"
