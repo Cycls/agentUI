@@ -27,22 +27,41 @@ function fileKind(mime) {
   return "file";
 }
 
-// small helper: uploads a single File via Edge Function
-async function uploadOne(file, orgId = "anon", userId = "anon") {
+// Upload a single file via the attachments API
+async function uploadOne(file, getToken) {
   if (file.size > CONFIG.MAX_FILE_BYTES)
     throw new Error("File too large (max 10MB)");
   if (!CONFIG.ALLOWED_MIME.has(file.type))
     throw new Error(`Type not allowed: ${file.type}`);
+
   const fd = new FormData();
   fd.append("file", file);
-  fd.append("orgId", orgId);
-  fd.append("userId", userId);
-  const res = await fetch(
-    "https://cfywthfcvbajcekvwajz.supabase.co/functions/v1/upload",
-    { method: "POST", body: fd }
-  );
+
+  const headers = {};
+  if (getToken) {
+    const token = await getToken({ template: "template" });
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+  }
+
+  const res = await fetch("/attachments", {
+    method: "POST",
+    headers,
+    body: fd,
+  });
+
   if (!res.ok) throw new Error(`Upload failed (${res.status})`);
-  return await res.json(); // { name,url,mime,size,sha256,path }
+
+  const data = await res.json(); // { url: "https://...signed-url.../photo.png" }
+
+  // Return metadata compatible with existing attachment format
+  return {
+    name: file.name,
+    url: data.url,
+    mime: file.type,
+    size: file.size,
+  };
 }
 
 // Format file size

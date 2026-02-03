@@ -1,11 +1,7 @@
 import { useCallback, useRef } from "react";
-import { uploadOne } from "../utils/file";
 import { sendCyclsChatMessage } from "../services/api";
 import { ChatHistoryManager } from "../services/storage";
 import {
-  trackFileUploadStarted,
-  trackFileUploadCompleted,
-  trackFileUploadFailed,
   trackMessageSent,
   trackChatCreated,
   trackGenerationStopped,
@@ -20,7 +16,6 @@ export const useChatSend = ({
   setMessages,
   setShouldFocus,
   setIsLoading,
-  setUploadProgress,
   setIsUserScrolled,
   onFirstSend,
   auth,
@@ -39,14 +34,15 @@ export const useChatSend = ({
     async (payload) => {
       const hasPayload = typeof payload === "object" && payload !== null;
       const text = hasPayload ? payload.text || "" : String(payload || "");
-      const pendingFiles = hasPayload ? payload.files || [] : [];
+      // Attachments are now pre-uploaded, so we receive metadata directly
+      const attachments = hasPayload ? payload.attachments || [] : [];
 
-      if (!text.trim() && pendingFiles.length === 0) {
+      if (!text.trim() && attachments.length === 0) {
         setShouldFocus(true);
         return;
       }
 
-      if (text === ":clear" && pendingFiles.length === 0) {
+      if (text === ":clear" && attachments.length === 0) {
         setMessages([]);
         setActiveChatId(null);
         ChatHistoryManager.setActiveChat("");
@@ -58,39 +54,6 @@ export const useChatSend = ({
 
       setIsLoading(true);
       setIsUserScrolled(false);
-
-      const attachments = [];
-      for (let i = 0; i < pendingFiles.length; i++) {
-        const f = pendingFiles[i];
-        try {
-          setUploadProgress({ fileName: f.name, progress: 0 });
-          if (analyticsEnabled) trackFileUploadStarted(f.name, f.type);
-          const meta = await uploadOne(f);
-          setUploadProgress({ fileName: f.name, progress: 100 });
-          if (analyticsEnabled) trackFileUploadCompleted(f.name, f.type);
-          attachments.push(meta);
-          setTimeout(() => setUploadProgress(null), 500);
-        } catch (e) {
-          console.error("Upload error:", e);
-          if (analyticsEnabled) trackFileUploadFailed(f.name, e.message);
-          setUploadProgress(null);
-          setIsLoading(false);
-          setMessages((prev) => [
-            ...prev,
-            { role: "user", content: text },
-            {
-              role: "assistant",
-              parts: [],
-              error: {
-                type: "server",
-                message: "Failed to upload " + f.name + ": " + e.message,
-                status: null,
-              },
-            },
-          ]);
-          return;
-        }
-      }
 
       let finalContent = text;
       if (attachments.length > 0) {
@@ -176,6 +139,11 @@ export const useChatSend = ({
                 const updated = [...prev];
                 const assistantMsg = updated[updated.length - 1];
 
+                // Guard: ensure we have an assistant message to update
+                if (!assistantMsg || assistantMsg.role !== "assistant") {
+                  return prev;
+                }
+
                 if (!assistantMsg.parts) {
                   assistantMsg.parts = [];
                 }
@@ -210,6 +178,11 @@ export const useChatSend = ({
             setMessages((prev) => {
               const updated = [...prev];
               const assistantMsg = updated[updated.length - 1];
+
+              // Guard: ensure we have an assistant message to update
+              if (!assistantMsg || assistantMsg.role !== "assistant") {
+                return prev;
+              }
 
               // Initialize parts array if needed
               if (!assistantMsg.parts) {
@@ -403,7 +376,6 @@ export const useChatSend = ({
       setMessages,
       setShouldFocus,
       setIsLoading,
-      setUploadProgress,
       setIsUserScrolled,
       onFirstSend,
       onCanvasEvent,

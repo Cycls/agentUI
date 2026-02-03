@@ -20,7 +20,7 @@ export const AttachmentPreview = ({ attachments = [] }) => {
             >
               <img
                 src={f.url}
-                alt=""
+                alt={f.name || ""}
                 loading="lazy"
                 className="mb-1 w-40 rounded-md"
               />
@@ -35,6 +35,7 @@ export const AttachmentPreview = ({ attachments = [] }) => {
             csv: "📊",
             md: "📝",
             txt: "📝",
+            video: "🎬",
           }[kind] || "📎";
 
         return (
