@@ -17,7 +17,6 @@ import {
 import { MarkdownRenderer } from "./components/MarkdownRenderer";
 import { MessageList } from "./components/MessageList";
 import { Composer } from "./components/Composer";
-import { UploadProgress } from "./components/UploadProgress";
 import { ChatHistorySidebar } from "./components/Sidebar";
 import { TierModal } from "./components/TierModal";
 import { ThemeToggle } from "./components/ThemeContext";
@@ -149,6 +148,7 @@ const AppContent = ({
     appendContent,
     markDone,
     closeCanvas,
+    resetCanvas,
   } = useCanvas();
   const { chatWidthPercent, isMobile: isCanvasMobile } = useCanvasWidth(
     canvasState.isOpen
@@ -157,7 +157,6 @@ const AppContent = ({
   const [messages, setMessages] = useState([]);
   const [shouldFocus, setShouldFocus] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(null);
   const [hasBegun, setHasBegun] = useState(false);
   const [isUserScrolled, setIsUserScrolled] = useState(false);
   const [retryingIndex, setRetryingIndex] = useState(null);
@@ -293,7 +292,6 @@ const AppContent = ({
     setMessages,
     setShouldFocus,
     setIsLoading,
-    setUploadProgress,
     setIsUserScrolled,
     onFirstSend: () => setHasBegun(true),
     auth: AUTH,
@@ -311,10 +309,11 @@ const AppContent = ({
     setMessages([]);
     setActiveChatId(null);
     setHasBegun(false);
+    resetCanvas();
     ChatHistoryManager.setActiveChat("");
     window.scrollTo(0, 0);
     if (analyticsEnabled) trackNewChatStarted();
-  }, [analyticsEnabled]);
+  }, [analyticsEnabled, resetCanvas]);
 
   const handleSelectChat = useCallback(
     (chatId) => {
@@ -323,6 +322,7 @@ const AppContent = ({
         setMessages(chat.messages);
         setActiveChatId(chatId);
         setHasBegun(chat.messages.length > 0);
+        resetCanvas();
         ChatHistoryManager.setActiveChat(chatId);
         if (window.innerWidth < 768) {
           setIsSidebarOpen(false);
@@ -331,7 +331,7 @@ const AppContent = ({
         if (analyticsEnabled) trackChatSelected(chatId);
       }
     },
-    [analyticsEnabled]
+    [analyticsEnabled, resetCanvas]
   );
 
   const handleDeleteChat = useCallback(
@@ -874,13 +874,6 @@ const AppContent = ({
           </div>
         </div>
         <div className="mx-auto max-w-3xl min-h-screen px-4 pb-[200px] md:pb-[180px]">
-          {uploadProgress && (
-            <UploadProgress
-              fileName={uploadProgress.fileName}
-              progress={uploadProgress.progress}
-            />
-          )}
-
           {/* Header */}
           <div className="prose m-2 mx-auto max-w-3xl p-2 prose-pre:p-0 pt-14 md:pt-2">
             <MarkdownRenderer markdown={HEADER} onSend={send} />
@@ -927,6 +920,7 @@ const AppContent = ({
         canvasWidthPercent={
           canvasState.isOpen && !isCanvasMobile ? 100 - chatWidthPercent : 0
         }
+        getToken={authApi?.getToken}
       />
     </div>
   );
