@@ -873,7 +873,7 @@ const AppContent = ({
             )}
           </div>
         </div>
-        <div className="mx-auto max-w-3xl min-h-screen px-4 pb-[200px] md:pb-[180px]">
+        <div className="mx-auto max-w-3xl px-4 pb-[200px] md:pb-[180px]">
           {/* Header */}
           <div className="prose m-2 mx-auto max-w-3xl p-2 prose-pre:p-0 pt-14 md:pt-2">
             <MarkdownRenderer markdown={HEADER} onSend={send} />
