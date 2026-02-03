@@ -306,6 +306,8 @@ const AppContent = ({
   });
 
   const handleNewChat = useCallback(() => {
+    handleStop();
+    setIsLoading(false);
     setMessages([]);
     setActiveChatId(null);
     setHasBegun(false);
@@ -313,10 +315,12 @@ const AppContent = ({
     ChatHistoryManager.setActiveChat("");
     window.scrollTo(0, 0);
     if (analyticsEnabled) trackNewChatStarted();
-  }, [analyticsEnabled, resetCanvas]);
+  }, [analyticsEnabled, resetCanvas, handleStop]);
 
   const handleSelectChat = useCallback(
     (chatId) => {
+      handleStop();
+      setIsLoading(false);
       const chat = ChatHistoryManager.getChat(chatId);
       if (chat) {
         setMessages(chat.messages);
@@ -331,7 +335,7 @@ const AppContent = ({
         if (analyticsEnabled) trackChatSelected(chatId);
       }
     },
-    [analyticsEnabled, resetCanvas]
+    [analyticsEnabled, resetCanvas, handleStop]
   );
 
   const handleDeleteChat = useCallback(
