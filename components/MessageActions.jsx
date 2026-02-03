@@ -11,8 +11,21 @@ export const MessageActions = ({
 
   const handleCopy = async () => {
     try {
-      const { clean } = extractAttachmentsFromContent(message.content);
-      await navigator.clipboard.writeText(clean);
+      let textToCopy = "";
+
+      if (message.parts && Array.isArray(message.parts)) {
+        // New format: extract text from parts
+        textToCopy = message.parts
+          .filter((p) => p.type === "text" && p.text)
+          .map((p) => p.text)
+          .join("\n\n");
+      } else if (message.content) {
+        // Old format: use content directly
+        const { clean } = extractAttachmentsFromContent(message.content);
+        textToCopy = clean;
+      }
+
+      await navigator.clipboard.writeText(textToCopy);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
