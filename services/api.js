@@ -47,13 +47,13 @@ export async function sendChatMessage({
     for (const att of msgAttachments) {
       if (att.mime && att.mime.startsWith("image/")) {
         contentArray.push({
-          type: "image_url",
-          image_url: { url: att.url },
+          type: "image",
+          image: { url: att.url },
         });
       } else {
         contentArray.push({
           type: "file",
-          text:
+          file:
             "[File attached: " +
             att.name +
             "]\nFile URL: " +
@@ -158,13 +158,13 @@ export async function sendCyclsChatMessage({
       for (const att of msgAttachments) {
         if (att.mime && att.mime.startsWith("image/")) {
           contentArray.push({
-            type: "image_url",
-            image_url: { url: att.url },
+            type: "image",
+            image: { url: att.url },
           });
         } else {
           contentArray.push({
             type: "file",
-            text:
+            file:
               "[File attached: " +
               att.name +
               "]\nFile URL: " +
@@ -196,13 +196,13 @@ export async function sendCyclsChatMessage({
     for (const att of msgAttachments) {
       if (att.mime && att.mime.startsWith("image/")) {
         contentArray.push({
-          type: "image_url",
-          image_url: { url: att.url },
+          type: "image",
+          image: { url: att.url },
         });
       } else {
         contentArray.push({
           type: "file",
-          text:
+          file:
             "[File attached: " +
             att.name +
             "]\nFile URL: " +
