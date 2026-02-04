@@ -48,18 +48,12 @@ export async function sendChatMessage({
       if (att.mime && att.mime.startsWith("image/")) {
         contentArray.push({
           type: "image",
-          image: { url: att.url },
+          image: att.url,
         });
       } else {
         contentArray.push({
           type: "file",
-          file:
-            "[File attached: " +
-            att.name +
-            "]\nFile URL: " +
-            att.url +
-            "\nFile type: " +
-            (att.mime || "unknown"),
+          file: att.url,
         });
       }
     }
@@ -159,18 +153,12 @@ export async function sendCyclsChatMessage({
         if (att.mime && att.mime.startsWith("image/")) {
           contentArray.push({
             type: "image",
-            image: { url: att.url },
+            image: att.url,
           });
         } else {
           contentArray.push({
             type: "file",
-            file:
-              "[File attached: " +
-              att.name +
-              "]\nFile URL: " +
-              att.url +
-              "\nFile type: " +
-              (att.mime || "unknown"),
+            file: att.url,
           });
         }
       }
@@ -197,18 +185,12 @@ export async function sendCyclsChatMessage({
       if (att.mime && att.mime.startsWith("image/")) {
         contentArray.push({
           type: "image",
-          image: { url: att.url },
+          image: att.url,
         });
       } else {
         contentArray.push({
           type: "file",
-          file:
-            "[File attached: " +
-            att.name +
-            "]\nFile URL: " +
-            att.url +
-            "\nFile type: " +
-            (att.mime || "unknown"),
+          file: att.url,
         });
       }
     }
