@@ -161,6 +161,7 @@ const AppContent = ({
   const [isUserScrolled, setIsUserScrolled] = useState(false);
   const [retryingIndex, setRetryingIndex] = useState(null);
   const messagesEndRef = useRef(null);
+  const isLoadingChatRef = useRef(false);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
@@ -221,6 +222,10 @@ const AppContent = ({
 
   useEffect(() => {
     if (messages.length > 0 && activeChatId) {
+      if (isLoadingChatRef.current) {
+        isLoadingChatRef.current = false;
+        return;
+      }
       ChatHistoryManager.updateChat(activeChatId, messages);
       setChatHistory(ChatHistoryManager.getAllChats());
     }
@@ -323,6 +328,7 @@ const AppContent = ({
       setIsLoading(false);
       const chat = ChatHistoryManager.getChat(chatId);
       if (chat) {
+        isLoadingChatRef.current = true;
         setMessages(chat.messages);
         setActiveChatId(chatId);
         setHasBegun(chat.messages.length > 0);
