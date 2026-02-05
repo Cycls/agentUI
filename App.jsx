@@ -839,24 +839,28 @@ const AppContent = ({
           {/* Top-right actions: Theme toggle + Home link */}
           <div className="fixed max-sm:top-[2%] max-sm:right-3 top-1 right-4 flex items-center gap-2 z-20">
             {/* Theme Toggle */}
-            <ThemeToggle className="max-sm:bg-[var(--bg-primary)] max-sm:shadow-sm max-sm:border max-sm:border-[var(--border-color)]" />
+            <ThemeToggle />
 
             {/* Home button */}
-            {TIER === "cycls_pass" && (
+            {!AUTH && (
               <a
                 href="https://cycls.ai/"
                 type="button"
                 className="
                 inline-flex items-center gap-2
-                rounded-xl px-3 py-2
+                rounded-xl backdrop-blur px-3 py-2
                 text-sm font-medium
                 hover:bg-[var(--bg-hover)]
                 active:bg-[var(--bg-active)]
                 transition-colors
                 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]/20
-                max-sm:bg-[var(--bg-primary)] max-sm:shadow-sm max-sm:border max-sm:border-[var(--border-color)]
+                theme-transition
               "
-                style={{ color: "var(--text-primary)" }}
+                style={{
+                  backgroundColor: "var(--bg-sidebar)",
+                  border: "1px solid var(--border-primary)",
+                  color: "var(--text-primary)",
+                }}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
