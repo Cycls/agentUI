@@ -134,19 +134,24 @@ export const ThemeToggle = ({ className = "" }) => {
       className={`
         theme-toggle
         inline-flex items-center justify-center
-        rounded-xl p-2
+        rounded-xl backdrop-blur p-2
         hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)]
         focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]/20
-        transition-colors duration-200
+        theme-transition transition-colors duration-200
         ${className}
       `}
+      style={{
+        backgroundColor: "var(--bg-sidebar)",
+        border: "1px solid var(--border-primary)",
+        color: "var(--text-primary)",
+      }}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       title={isDark ? "Light mode" : "Dark mode"}
     >
       {isDark ? (
         // Sun icon for dark mode (click to go light)
         <svg
-          className="theme-toggle-icon w-5 h-5 text-[var(--text-primary)]"
+          className="theme-toggle-icon w-5 h-5"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -167,7 +172,7 @@ export const ThemeToggle = ({ className = "" }) => {
       ) : (
         // Moon icon for light mode (click to go dark)
         <svg
-          className="theme-toggle-icon w-5 h-5 text-[var(--text-primary)]"
+          className="theme-toggle-icon w-5 h-5"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
