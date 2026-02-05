@@ -848,7 +848,7 @@ const AppContent = ({
             <ThemeToggle />
 
             {/* Home button */}
-            {!AUTH && (
+            {TIER === "cycls_pass" && (
               <a
                 href="https://cycls.ai/"
                 type="button"
