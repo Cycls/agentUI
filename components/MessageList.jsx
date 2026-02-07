@@ -58,6 +58,7 @@ export const MessageList = React.memo(
                       <div
                         dir="auto"
                         className="text-[15px] leading-relaxed whitespace-pre-wrap"
+                        style={{ wordBreak: "break-word", overflowWrap: "break-word" }}
                       >
                         {clean}
                       </div>
@@ -111,8 +112,11 @@ export const MessageList = React.memo(
                           />
                         ))}
 
-                        {/* Streaming indicator while generating */}
-                        {isCurrentlyGenerating && <StreamingIndicator />}
+                        {/* Streaming indicator while generating (hide when text is streaming) */}
+                        {isCurrentlyGenerating &&
+                          !message.parts.some((p) => p.type === "text" && p.text) && (
+                            <StreamingIndicator />
+                          )}
                       </div>
                     )}
 
@@ -120,7 +124,8 @@ export const MessageList = React.memo(
                     {hasContent && (
                       <div className="prose prose-sm max-w-none">
                         <MarkdownRenderer markdown={message.content} onSend={onSend} />
-                        {isCurrentlyGenerating && <StreamingIndicator />}
+                        {/* Streaming indicator (hide when text content is streaming) */}
+                        {isCurrentlyGenerating && !message.content && <StreamingIndicator />}
                       </div>
                     )}
 
