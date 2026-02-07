@@ -145,16 +145,15 @@ const TableComponent = ({ children, ...props }) => {
         {children}
       </table>
       <div
-        className="!-mt-2"
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "12px 16px",
-          marginTop: "8px",
-          borderRadius: "8px",
-          backgroundColor: "var(--bg-secondary)",
-          border: "1px solid var(--border-primary)",
+          padding: "8px 12px",
+          marginTop: "-18px",
+          borderRadius: "0 0 10px 10px",
+          backgroundColor: "var(--bg-secondary, #f8f9fa)",
+          borderTop: "1px solid var(--border-primary, #e5e7eb)",
         }}
       >
         <button
@@ -162,20 +161,32 @@ const TableComponent = ({ children, ...props }) => {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "8px",
-            fontSize: "14px",
-            color: "var(--text-secondary)",
+            gap: "6px",
+            fontSize: "13px",
+            fontWeight: 500,
+            color: "var(--text-tertiary, #6b7280)",
             background: "none",
             border: "none",
             cursor: "pointer",
-            padding: "0",
+            padding: "4px 12px",
+            borderRadius: "6px",
+            transition: "all 0.15s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor =
+              "var(--bg-tertiary, #e5e7eb)";
+            e.currentTarget.style.color = "var(--text-secondary, #374151)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+            e.currentTarget.style.color = "var(--text-tertiary, #6b7280)";
           }}
           aria-label="Export table as CSV"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
+            width="14"
+            height="14"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -183,61 +194,80 @@ const TableComponent = ({ children, ...props }) => {
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-            <line x1="3" y1="9" x2="21" y2="9" />
-            <line x1="3" y1="15" x2="21" y2="15" />
-            <line x1="9" y1="3" x2="9" y2="21" />
-            <line x1="15" y1="3" x2="15" y2="21" />
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
-          <span>Export as CSV</span>
+          <span>Export CSV</span>
         </button>
         <button
           onClick={handleCopy}
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "6px",
-            padding: "6px",
-            borderRadius: "4px",
+            gap: "4px",
+            padding: "4px 12px",
+            borderRadius: "6px",
             background: "none",
             border: "none",
             cursor: "pointer",
+            fontSize: "13px",
+            fontWeight: 500,
             color: copied
-              ? "var(--text-success, #22c55e)"
-              : "var(--text-tertiary)",
+              ? "var(--text-success, #16a34a)"
+              : "var(--text-tertiary, #6b7280)",
+            transition: "all 0.15s ease",
           }}
-          title={copied ? "Copied!" : "Copy table"}
-          aria-label="Copy table"
+          onMouseEnter={(e) => {
+            if (!copied) {
+              e.currentTarget.style.backgroundColor =
+                "var(--bg-tertiary, #e5e7eb)";
+              e.currentTarget.style.color = "var(--text-secondary, #374151)";
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!copied) {
+              e.currentTarget.style.backgroundColor = "transparent";
+              e.currentTarget.style.color = "var(--text-tertiary, #6b7280)";
+            }
+          }}
+          aria-label={copied ? "Copied!" : "Copy table"}
         >
           {copied ? (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
+            <>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span>Copied!</span>
+            </>
           ) : (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-            </svg>
+            <>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+              <span>Copy</span>
+            </>
           )}
         </button>
       </div>
@@ -260,7 +290,10 @@ export const MarkdownRenderer = React.memo(({ markdown, onSend }) => {
   );
 
   return (
-    <div dir="auto">
+    <div
+      dir="auto"
+      style={{ overflowWrap: "break-word", wordWrap: "break-word" }}
+    >
       <Markdown
         components={components}
         remarkPlugins={[remarkGfm, remarkMath]}
