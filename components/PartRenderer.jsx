@@ -59,6 +59,24 @@ function StepDot() {
   );
 }
 
+// Activity indicator - shows work is happening with orbiting dots and pulse
+function ActivityIndicator() {
+  return (
+    <div className="step-activity-container">
+      {/* Pulsing ring */}
+      <div className="step-pulse-ring" />
+      <div className="step-pulse-ring step-pulse-ring-delayed" />
+      {/* Orbiting dots */}
+      <div className="step-orbit">
+        <div className="step-orbit-dot" />
+      </div>
+      <div className="step-orbit step-orbit-reverse">
+        <div className="step-orbit-dot step-orbit-dot-alt" />
+      </div>
+    </div>
+  );
+}
+
 // Document icon for canvas
 function DocumentIcon() {
   return (
@@ -313,7 +331,7 @@ function ThinkingBlock({ thinking, onSend, isActive, startTime, duration }) {
 }
 
 // Steps block - Claude style with border and timeline
-function StepsBlock({ steps, onSend }) {
+function StepsBlock({ steps, onSend, isGenerating }) {
   const [expanded, setExpanded] = React.useState(false);
   const [expandedSteps, setExpandedSteps] = React.useState({});
 
@@ -404,9 +422,10 @@ function StepsBlock({ steps, onSend }) {
                 )}
 
                 <div className="flex items-start gap-3 py-1.5">
-                  {/* Icon - globe for search, dot for others */}
-                  <div className="flex-shrink-0 mt-0.5 flex items-center justify-center w-4 h-4">
+                  {/* Icon - globe for search, dot for others, with activity indicator for active step */}
+                  <div className="flex-shrink-0 mt-0.5 flex items-center justify-center w-4 h-4 relative">
                     {isSearch ? <GlobeIcon /> : <StepDot />}
+                    {isGenerating && isLastStep && <ActivityIndicator />}
                   </div>
 
                   {/* Step content */}
@@ -418,10 +437,14 @@ function StepsBlock({ steps, onSend }) {
                       }
                       disabled={!hasData}
                       className={cx(
-                        "flex-1 text-left text-sm leading-relaxed",
-                        hasData && "cursor-pointer hover:opacity-80"
+                        "flex-1 min-w-0 text-left text-sm leading-relaxed",
+                        hasData && "cursor-pointer hover:opacity-80",
+                        isGenerating && isLastStep && "step-text-shimmer"
                       )}
-                      style={{ color: "var(--text-secondary)" }}
+                      style={{
+                        color: isGenerating && isLastStep ? undefined : "var(--text-secondary)",
+                        wordBreak: "break-all",
+                      }}
                     >
                       {step.step}
                     </button>
@@ -454,10 +477,11 @@ function StepsBlock({ steps, onSend }) {
                 {hasData && isStepExpanded && (
                   <div className="ml-7 mt-1 mb-2">
                     <div
-                      className="rounded-lg border px-2 prose prose-sm max-w-none overflow-x-auto"
+                      className="rounded-lg border px-2 prose prose-sm max-w-none"
                       style={{
                         borderColor: "var(--border-primary)",
                         color: "var(--text-tertiary)",
+                        wordBreak: "break-all",
                       }}
                     >
                       <MarkdownRenderer
@@ -516,7 +540,7 @@ export const PartRenderer = React.memo(function PartRenderer({
 
   // Handle steps type (aggregated steps array)
   if (part.type === "steps") {
-    return <StepsBlock steps={part.steps || []} onSend={onSend} />;
+    return <StepsBlock steps={part.steps || []} onSend={onSend} isGenerating={isGenerating} />;
   }
 
   // Handle image type with native download UI (format: {type: "image", image: "url"})
