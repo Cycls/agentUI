@@ -161,6 +161,27 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
+   LONG URL/PATH WRAPPING FIX
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* Force long URLs and paths to wrap - break-all needed for URLs without spaces */
+.prose,
+.prose p,
+.prose li,
+.prose-sm {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+/* Links and inline code need aggressive breaking for long URLs */
+.prose a,
+.prose code:not(pre code),
+.prose-sm a,
+.prose-sm code:not(pre code) {
+  word-break: break-all;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
    CLERK COMPONENT OVERRIDES
    ═══════════════════════════════════════════════════════════════════════════════ */
 
@@ -488,5 +509,150 @@ body {
   .canvas-editor .streaming-cursor {
     animation: none;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   STEP ACTIVITY INDICATOR
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.step-activity-container {
+  position: absolute;
+  inset: -8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* Pulsing rings */
+.step-pulse-ring {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent-primary);
+  opacity: 0;
+  animation: stepPulse 2s ease-out infinite;
+}
+
+.step-pulse-ring-delayed {
+  animation-delay: 1s;
+}
+
+@keyframes stepPulse {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+/* Orbiting dots */
+.step-orbit {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  animation: stepOrbit 2s linear infinite;
+}
+
+.step-orbit-reverse {
+  animation: stepOrbitReverse 2.5s linear infinite;
+}
+
+.step-orbit-dot {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 3px;
+  height: 3px;
+  margin-left: -1.5px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  box-shadow: 0 0 6px var(--accent-primary);
+}
+
+.step-orbit-dot-alt {
+  width: 2px;
+  height: 2px;
+  margin-left: -1px;
+  opacity: 0.6;
+}
+
+@keyframes stepOrbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes stepOrbitReverse {
+  from {
+    transform: rotate(180deg);
+  }
+  to {
+    transform: rotate(-180deg);
+  }
+}
+
+/* Shimmer effect for active step text */
+.step-text-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--text-secondary) 0%,
+    var(--text-primary) 50%,
+    var(--text-secondary) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: stepShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes stepShimmer {
+  0%, 100% {
+    background-position: 200% 0;
+  }
+  50% {
+    background-position: 0% 0;
+  }
+}
+
+/* Reduced motion - show static indicator instead */
+@media (prefers-reduced-motion: reduce) {
+  .step-pulse-ring {
+    animation: none;
+    opacity: 0.4;
+    transform: scale(1.2);
+  }
+
+  .step-pulse-ring-delayed {
+    display: none;
+  }
+
+  .step-orbit {
+    animation: none;
+  }
+
+  .step-orbit-dot {
+    top: 50%;
+    margin-top: -1.5px;
+    animation: stepBlink 1s step-end infinite;
+  }
+
+  .step-text-shimmer {
+    animation: none;
+    -webkit-text-fill-color: var(--text-primary);
+  }
+}
+
+@keyframes stepBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
 }
 
