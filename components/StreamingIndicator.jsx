@@ -1,6 +1,33 @@
+import { useState, useEffect } from "react";
+
 export function StreamingIndicator({ className = "" }) {
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setElapsedSeconds((prev) => prev + 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Determine the text to display based on elapsed time
+  const getText = () => {
+    if (elapsedSeconds < 2) {
+      return "Cycling...";
+    } else if (elapsedSeconds < 4) {
+      return "Cycling...(thinking)";
+    } else {
+      return `Cycling...(thinking ${elapsedSeconds - 4}s)`;
+    }
+  };
+
   return (
-    <div className={`py-1 ${className}`} role="status" aria-label="Loading">
+    <div
+      className={`py-1 flex items-center gap-2 ${className}`}
+      role="status"
+      aria-label="Loading"
+    >
       <svg
         width="30"
         height="30"
@@ -16,6 +43,12 @@ export function StreamingIndicator({ className = "" }) {
           fill="#D4A574"
         />
       </svg>
+      <span
+        className="text-sm animate-text-pulse"
+        style={{ color: "var(--text-primary)" }}
+      >
+        {getText()}
+      </span>
 
       <style>{`
         @keyframes pulse-star {
@@ -29,8 +62,21 @@ export function StreamingIndicator({ className = "" }) {
           }
         }
 
+        @keyframes text-pulse {
+          0%, 100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.5;
+          }
+        }
+
         .animate-pulse-star {
           animation: pulse-star 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .animate-text-pulse {
+          animation: text-pulse 2s ease-in-out infinite;
         }
       `}</style>
     </div>
