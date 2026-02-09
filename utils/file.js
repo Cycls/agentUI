@@ -31,8 +31,7 @@ function fileKind(mime) {
 async function uploadOne(file, getToken) {
   if (file.size > CONFIG.MAX_FILE_BYTES)
     throw new Error("File too large (max 10MB)");
-  if (!CONFIG.ALLOWED_MIME.has(file.type))
-    throw new Error(`Type not allowed: ${file.type}`);
+  // All file types accepted
 
   const fd = new FormData();
   fd.append("file", file);
@@ -82,15 +81,7 @@ const validateFile = (file) => {
     };
   }
 
-  if (!CONFIG.ALLOWED_MIME.has(file.type)) {
-    const allowedTypes = Array.from(CONFIG.ALLOWED_MIME)
-      .map((type) => type.split("/")[1])
-      .join(", ");
-    return {
-      valid: false,
-      error: `File type "${file.type}" is not supported. Allowed types: ${allowedTypes}`,
-    };
-  }
+  // All file types accepted
 
   return { valid: true };
 };
