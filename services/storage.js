@@ -1,10 +1,6 @@
-import { extractAttachmentsFromContent } from "../utils/file";
-import { CONFIG } from "../clientConfig";
-
 // ───────────────────────────────────────────────────────────────────────────────
 // LocalStorage Keys
 // ───────────────────────────────────────────────────────────────────────────────
-const CHAT_HISTORY_KEY = "cycls_chat_history";
 const ACTIVE_CHAT_KEY = "cycls_active_chat";
 const MESSAGE_COUNT_KEY = "cycls_message_count";
 
@@ -39,116 +35,70 @@ export function clearMessageCount() {
 }
 
 // ───────────────────────────────────────────────────────────────────────────────
-// Chat History Manager
+// Active Chat Helpers (local-only concern)
 // ───────────────────────────────────────────────────────────────────────────────
-export class ChatHistoryManager {
-  static getAllChats() {
-    try {
-      const stored = localStorage.getItem(CHAT_HISTORY_KEY);
-      return stored ? JSON.parse(stored) : [];
-    } catch (e) {
-      console.error("Error loading chat history:", e);
-      return [];
-    }
+export function getActiveChat() {
+  try {
+    return localStorage.getItem(ACTIVE_CHAT_KEY);
+  } catch {
+    return null;
   }
+}
 
-  static saveAllChats(chats) {
-    try {
-      localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(chats));
-    } catch (e) {
-      console.error("Error saving chat history:", e);
-    }
+export function setActiveChat(chatId) {
+  try {
+    localStorage.setItem(ACTIVE_CHAT_KEY, chatId);
+  } catch (_) {
+    // Silently ignore
   }
+}
 
-  static getActiveChat() {
-    try {
-      return localStorage.getItem(ACTIVE_CHAT_KEY);
-    } catch (e) {
-      return null;
-    }
+// ───────────────────────────────────────────────────────────────────────────────
+// Pinned Chats Helpers (local-only, max 3)
+// ───────────────────────────────────────────────────────────────────────────────
+const PINNED_CHATS_KEY = "cycls_pinned_chats";
+const MAX_PINS = 3;
+
+export function getPinnedChats() {
+  try {
+    const stored = localStorage.getItem(PINNED_CHATS_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
   }
+}
 
-  static setActiveChat(chatId) {
-    try {
-      localStorage.setItem(ACTIVE_CHAT_KEY, chatId);
-    } catch (e) {
-      console.error("Error saving active chat:", e);
-    }
-  }
+export function pinChat(chatId) {
+  const pins = getPinnedChats();
+  if (pins.includes(chatId)) return pins;
+  const updated = [chatId, ...pins].slice(0, MAX_PINS);
+  try { localStorage.setItem(PINNED_CHATS_KEY, JSON.stringify(updated)); } catch {}
+  return updated;
+}
 
-  static createChat(messages = []) {
-    const chats = this.getAllChats();
-    const newChat = {
-      id: Date.now().toString(),
-      title: this.generateTitle(messages),
-      messages: messages,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+export function unpinChat(chatId) {
+  const pins = getPinnedChats();
+  const updated = pins.filter((id) => id !== chatId);
+  try { localStorage.setItem(PINNED_CHATS_KEY, JSON.stringify(updated)); } catch {}
+  return updated;
+}
 
-    // If we have max chats, remove the oldest
-    if (chats.length >= CONFIG.MAX_CHATS) {
-      chats.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-      chats.shift(); // Remove oldest
-    }
+export function isPinned(chatId) {
+  return getPinnedChats().includes(chatId);
+}
 
-    chats.push(newChat);
-    this.saveAllChats(chats);
-    this.setActiveChat(newChat.id);
-    return newChat;
-  }
-
-  static updateChat(chatId, messages) {
-    const chats = this.getAllChats();
-    const chatIndex = chats.findIndex((c) => c.id === chatId);
-
-    if (chatIndex !== -1) {
-      chats[chatIndex].messages = messages;
-      chats[chatIndex].updatedAt = new Date().toISOString();
-      chats[chatIndex].title = this.generateTitle(messages);
-      this.saveAllChats(chats);
-    }
-  }
-
-  static deleteChat(chatId) {
-    const chats = this.getAllChats();
-    const filtered = chats.filter((c) => c.id !== chatId);
-    this.saveAllChats(filtered);
-
-    // If we deleted the active chat, clear active chat
-    if (this.getActiveChat() === chatId) {
-      localStorage.removeItem(ACTIVE_CHAT_KEY);
-    }
-  }
-
-  static getChat(chatId) {
-    const chats = this.getAllChats();
-    return chats.find((c) => c.id === chatId);
-  }
-
-  static generateTitle(messages) {
-    if (!messages || messages.length === 0) {
-      return "New Chat";
-    }
-
-    // Find first user message (supports both old format with type and new format with role)
-    const firstUserMsg = messages.find((m) => m.type === "request" || m.role === "user");
-    if (!firstUserMsg) {
-      return "New Chat";
-    }
-
-    // Extract clean content (without attachments)
-    const { clean } = extractAttachmentsFromContent(firstUserMsg.content);
-    const title = clean.trim().slice(0, 50);
-    return title || "New Chat";
-  }
-
-  static clearAll() {
-    try {
-      localStorage.removeItem(CHAT_HISTORY_KEY);
-      localStorage.removeItem(ACTIVE_CHAT_KEY);
-    } catch (e) {
-      console.error("Error clearing chat history:", e);
-    }
-  }
+// ───────────────────────────────────────────────────────────────────────────────
+// Title generation helper (moved from ChatHistoryManager)
+// ───────────────────────────────────────────────────────────────────────────────
+export function generateTitle(messages) {
+  if (!messages || messages.length === 0) return "New Chat";
+  const firstUserMsg = messages.find(
+    (m) => m.type === "request" || m.role === "user"
+  );
+  if (!firstUserMsg) return "New Chat";
+  // Extract clean content (strip attachment manifests)
+  const re = /<!--\s*cycls:attachments\s*[\s\S]*?\s*cycls:attachments\s*-->/m;
+  const clean = (firstUserMsg.content || "").replace(re, "").trim();
+  const title = clean.slice(0, 50);
+  return title || "New Chat";
 }
