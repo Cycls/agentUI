@@ -369,7 +369,7 @@ export const Composer = ({
                   multiple
                   className="hidden"
                   onChange={onPick}
-                  accept=".jpg,.jpeg,.png,.webp,.pdf,.txt,.md,.csv"
+                  accept="*/*"
                   disabled={disabled}
                 />
 
