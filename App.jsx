@@ -862,7 +862,7 @@ const AppContent = ({
       >
         <div className="p-10">
           {/* Top-right actions: Theme toggle + Home link */}
-          <div className="fixed max-sm:top-[2%] max-sm:right-3 top-1 right-4 flex items-center gap-2 z-20">
+          <div className="fixed max-sm:top-[2%] max-sm:right-3 top-3 right-4 flex items-center gap-2 z-20">
             {/* Theme Toggle */}
             <ThemeToggle />
 
