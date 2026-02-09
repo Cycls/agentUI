@@ -15,7 +15,15 @@ export default defineConfig({
         changeOrigin: true,
       },
       "/attachments": {
-        target: "http://127.0.0.1:8080", // <-- use the host/port your agent prints
+        target: "http://127.0.0.1:8080",
+        changeOrigin: true,
+      },
+      "/sessions": {
+        target: "http://127.0.0.1:8080",
+        changeOrigin: true,
+      },
+      "/files": {
+        target: "http://127.0.0.1:8080",
         changeOrigin: true,
       },
     },

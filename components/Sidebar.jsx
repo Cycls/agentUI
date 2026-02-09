@@ -1,5 +1,6 @@
-import { useMemo, useState, useRef, useEffect, useId } from "react";
+import { useMemo, useState, useRef, useEffect, useId, useCallback } from "react";
 import { CONFIG } from "../clientConfig";
+import { getPinnedChats, pinChat, unpinChat } from "../services/storage";
 
 // ── Constants ──
 export const SIDEBAR_WIDTH = {
@@ -81,6 +82,21 @@ const TrashIcon = (props) => (
   </svg>
 );
 
+const FolderIcon = (props) => (
+  <svg
+    aria-hidden="true"
+    viewBox="0 0 24 24"
+    className={cx("w-[18px] h-[18px]", props?.className)}
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.7"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />
+  </svg>
+);
+
 const DotsIcon = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -100,6 +116,40 @@ const DotsIcon = (props) => (
     <circle cx="12" cy="12" r="1" />
     <circle cx="19" cy="12" r="1" />
     <circle cx="5" cy="12" r="1" />
+  </svg>
+);
+
+const PinIcon = (props) => (
+  <svg
+    aria-hidden="true"
+    viewBox="0 0 24 24"
+    className={cx("w-4 h-4", props?.className)}
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M12 17v5" />
+    <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" />
+  </svg>
+);
+
+const PinOffIcon = (props) => (
+  <svg
+    aria-hidden="true"
+    viewBox="0 0 24 24"
+    className={cx("w-4 h-4", props?.className)}
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M12 17v5" />
+    <path d="M15 9.34V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H7.89" />
+    <path d="m2 2 20 20" />
+    <path d="M9 9v1.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h11" />
   </svg>
 );
 
@@ -156,7 +206,7 @@ const SectionLabel = ({ children }) => (
   </div>
 );
 
-const ChatItem = ({ chat, isActive, onSelect, onDelete }) => {
+const ChatItem = ({ chat, isActive, isPinned, onSelect, onDelete, onPin, onUnpin, pinLimitReached }) => {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
   const btnRef = useRef(null);
@@ -179,6 +229,11 @@ const ChatItem = ({ chat, isActive, onSelect, onDelete }) => {
         }}
         aria-current={isActive ? "page" : undefined}
       >
+        {isPinned && (
+          <span className="shrink-0 opacity-40" style={{ color: "var(--text-tertiary)" }}>
+            <PinIcon />
+          </span>
+        )}
         <span
           className="min-w-0 flex-1 truncate text-sm"
           style={{ color: "var(--text-primary)" }}
@@ -225,6 +280,48 @@ const ChatItem = ({ chat, isActive, onSelect, onDelete }) => {
             border: "1px solid var(--border-primary)",
           }}
         >
+          {/* Pin / Unpin */}
+          {isPinned ? (
+            <button
+              role="menuitem"
+              onClick={(e) => {
+                e.stopPropagation();
+                onUnpin(chat.id);
+                setOpen(false);
+              }}
+              className={cx(
+                "w-full flex items-center gap-2 px-3 py-2.5 text-sm",
+                "hover:bg-[var(--bg-hover)] focus:bg-[var(--bg-hover)]",
+                "focus:outline-none theme-transition"
+              )}
+              style={{ color: "var(--text-primary)" }}
+            >
+              <PinOffIcon />
+              Unpin
+            </button>
+          ) : (
+            <button
+              role="menuitem"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!pinLimitReached) onPin(chat.id);
+                setOpen(false);
+              }}
+              className={cx(
+                "w-full flex items-center gap-2 px-3 py-2.5 text-sm",
+                "hover:bg-[var(--bg-hover)] focus:bg-[var(--bg-hover)]",
+                "focus:outline-none theme-transition",
+                pinLimitReached && "opacity-40 cursor-not-allowed"
+              )}
+              style={{ color: "var(--text-primary)" }}
+              title={pinLimitReached ? "Maximum 3 pins" : "Pin this chat"}
+            >
+              <PinIcon />
+              Pin{pinLimitReached ? " (max 3)" : ""}
+            </button>
+          )}
+
+          {/* Delete */}
           <button
             role="menuitem"
             onClick={(e) => {
@@ -295,17 +392,42 @@ export const ChatHistorySidebar = ({
   onSelectChat,
   onNewChat,
   onDeleteChat,
+  onOpenFiles,
   user,
   isOnPaidPlan,
   tierName,
   UserButtonComponent,
   isAuthenticated,
 }) => {
+  const [pinnedIds, setPinnedIds] = useState(() => getPinnedChats());
+
+  const handlePin = useCallback((chatId) => {
+    const updated = pinChat(chatId);
+    setPinnedIds(updated);
+  }, []);
+
+  const handleUnpin = useCallback((chatId) => {
+    const updated = unpinChat(chatId);
+    setPinnedIds(updated);
+  }, []);
+
   const sortedChats = useMemo(() => {
     return [...(chats || [])].sort(
       (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
     );
   }, [chats]);
+
+  // Separate pinned from unpinned
+  const pinnedChats = useMemo(() => {
+    return pinnedIds
+      .map((id) => sortedChats.find((c) => c.id === id))
+      .filter(Boolean);
+  }, [pinnedIds, sortedChats]);
+
+  const unpinnedChats = useMemo(() => {
+    const pinSet = new Set(pinnedIds);
+    return sortedChats.filter((c) => !pinSet.has(c.id));
+  }, [sortedChats, pinnedIds]);
 
   const groupedChats = useMemo(() => {
     const groups = {
@@ -325,7 +447,7 @@ export const ChatHistorySidebar = ({
     const monthAgo = new Date(today);
     monthAgo.setDate(monthAgo.getDate() - 30);
 
-    sortedChats.forEach((chat) => {
+    unpinnedChats.forEach((chat) => {
       const chatDate = new Date(chat.updatedAt);
       if (chatDate >= today) groups.today.push(chat);
       else if (chatDate >= yesterday) groups.yesterday.push(chat);
@@ -335,7 +457,23 @@ export const ChatHistorySidebar = ({
     });
 
     return groups;
-  }, [sortedChats]);
+  }, [unpinnedChats]);
+
+  const pinLimitReached = pinnedIds.length >= 3;
+
+  const renderChatItem = (chat) => (
+    <ChatItem
+      key={chat.id}
+      chat={chat}
+      isActive={activeChat === chat.id}
+      isPinned={pinnedIds.includes(chat.id)}
+      onSelect={onSelectChat}
+      onDelete={onDeleteChat}
+      onPin={handlePin}
+      onUnpin={handleUnpin}
+      pinLimitReached={pinLimitReached}
+    />
+  );
 
   const renderGroup = (title, list) => {
     if (!list?.length) return null;
@@ -343,19 +481,13 @@ export const ChatHistorySidebar = ({
       <div className="mb-4">
         <SectionLabel>{title}</SectionLabel>
         <div className="space-y-1">
-          {list.map((chat) => (
-            <ChatItem
-              key={chat.id}
-              chat={chat}
-              isActive={activeChat === chat.id}
-              onSelect={onSelectChat}
-              onDelete={onDeleteChat}
-            />
-          ))}
+          {list.map(renderChatItem)}
         </div>
       </div>
     );
   };
+
+  const hasChats = sortedChats.length > 0;
 
   return (
     <>
@@ -396,23 +528,45 @@ export const ChatHistorySidebar = ({
         >
           {/* Header */}
           <div className="flex h-14 items-center justify-between px-2">
-            <button
-              onClick={onNewChat}
-              className={cx(
-                "inline-flex items-center gap-2 rounded-xl px-2.5 py-2",
-                "hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)]",
-                "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]/20",
-                "theme-transition"
+            <div className="flex items-center gap-1">
+              <button
+                onClick={onNewChat}
+                className={cx(
+                  "inline-flex items-center gap-2 rounded-xl px-2.5 py-2",
+                  "hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)]",
+                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]/20",
+                  "theme-transition"
+                )}
+                style={{ color: "var(--text-primary)" }}
+                aria-label="New chat"
+                title="New chat"
+              >
+                <IconWrap>
+                  <NewChatIcon />
+                </IconWrap>
+                <span className="text-sm font-semibold">New</span>
+              </button>
+
+              {onOpenFiles && (
+                <button
+                  onClick={onOpenFiles}
+                  className={cx(
+                    "inline-flex items-center gap-2 rounded-xl px-2.5 py-2",
+                    "hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)]",
+                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]/20",
+                    "theme-transition"
+                  )}
+                  style={{ color: "var(--text-primary)" }}
+                  aria-label="Files"
+                  title="Files"
+                >
+                  <IconWrap>
+                    <FolderIcon />
+                  </IconWrap>
+                  <span className="text-sm font-semibold">Files</span>
+                </button>
               )}
-              style={{ color: "var(--text-primary)" }}
-              aria-label="New chat"
-              title="New chat"
-            >
-              <IconWrap>
-                <NewChatIcon />
-              </IconWrap>
-              <span className="text-sm font-semibold">New</span>
-            </button>
+            </div>
 
             <button
               onClick={onToggle}
@@ -436,7 +590,7 @@ export const ChatHistorySidebar = ({
 
           {/* Chat list */}
           <div className="flex-1 overflow-y-auto px-2 py-3 scrollbar-thin">
-            {sortedChats.length === 0 ? (
+            {!hasChats ? (
               <div
                 className="px-2 py-10 text-center text-sm"
                 style={{ color: "var(--text-tertiary)" }}
@@ -445,6 +599,15 @@ export const ChatHistorySidebar = ({
               </div>
             ) : (
               <>
+                {/* Pinned section */}
+                {pinnedChats.length > 0 && (
+                  <div className="mb-4">
+                    <SectionLabel>Pinned</SectionLabel>
+                    <div className="space-y-1">
+                      {pinnedChats.map(renderChatItem)}
+                    </div>
+                  </div>
+                )}
                 {renderGroup("Today", groupedChats.today)}
                 {renderGroup("Yesterday", groupedChats.yesterday)}
                 {renderGroup("Previous 7 days", groupedChats.previous7Days)}
@@ -503,7 +666,7 @@ export const ChatHistorySidebar = ({
             </button>
           </div>
 
-          <div className="px-1 py-2">
+          <div className="px-1 py-2 space-y-1">
             <SidebarButton
               onClick={onNewChat}
               icon={
@@ -515,6 +678,19 @@ export const ChatHistorySidebar = ({
               aria-label="New chat"
               title="New chat"
             />
+            {onOpenFiles && (
+              <SidebarButton
+                onClick={onOpenFiles}
+                icon={
+                  <IconWrap>
+                    <FolderIcon />
+                  </IconWrap>
+                }
+                isCollapsed
+                aria-label="Files"
+                title="Files"
+              />
+            )}
           </div>
 
           <div className="flex-1" />

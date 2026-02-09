@@ -19,6 +19,7 @@ import { MessageList } from "./components/MessageList";
 import { Composer } from "./components/Composer";
 import { ChatHistorySidebar } from "./components/Sidebar";
 import { TierModal } from "./components/TierModal";
+import { FileModal } from "./components/FileModal";
 import { ThemeToggle } from "./components/ThemeContext";
 import { AuthPage, RequireAuth } from "./components/AuthPage";
 import { SEOHead } from "./components/SEOHead";
@@ -37,11 +38,18 @@ import { useSidebarWidth } from "./hooks/useSidebarWidth";
 import { usePostHogIdentify } from "./hooks/usePostHogIdentify";
 
 import {
-  ChatHistoryManager,
   getMessageCount,
   incrementMessageCount,
   clearMessageCount,
+  setActiveChat,
+  generateTitle,
 } from "./services/storage";
+import {
+  listSessions,
+  getSession,
+  saveSession,
+  deleteSession,
+} from "./services/sessions";
 import { sendCyclsChatMessage } from "./services/api";
 
 import {
@@ -161,6 +169,7 @@ const AppContent = ({
   const [isUserScrolled, setIsUserScrolled] = useState(false);
   const [retryingIndex, setRetryingIndex] = useState(null);
   const messagesEndRef = useRef(null);
+  const messagesRef = useRef(messages);
   const isLoadingChatRef = useRef(false);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -171,6 +180,7 @@ const AppContent = ({
   const sidebarWidth = useSidebarWidth(isSidebarOpen);
 
   const [showTierModal, setShowTierModal] = useState(false);
+  const [isFileModalOpen, setIsFileModalOpen] = useState(false);
   const [messageCount, setMessageCount] = useState(0);
   const FREE_MESSAGE_LIMIT = 5;
 
@@ -212,24 +222,31 @@ const AppContent = ({
   }, [isOnPaidPlan]);
 
   useEffect(() => {
-    const chats = ChatHistoryManager.getAllChats();
-    setChatHistory(chats);
     setMessageCount(getMessageCount());
-
-    // Always start with a new chat (don't restore the last active chat)
-    // Users can select from sidebar if they want to continue an old chat
+    // Load chat history from server
+    listSessions(authApi?.getToken).then((chats) => setChatHistory(chats));
   }, []);
 
   useEffect(() => {
-    if (messages.length > 0 && activeChatId) {
-      if (isLoadingChatRef.current) {
-        isLoadingChatRef.current = false;
-        return;
-      }
-      ChatHistoryManager.updateChat(activeChatId, messages);
-      setChatHistory(ChatHistoryManager.getAllChats());
+    messagesRef.current = messages;
+    // Also reset the flag when loading a chat from sidebar
+    if (isLoadingChatRef.current) {
+      isLoadingChatRef.current = false;
     }
-  }, [messages, activeChatId]);
+  }, [messages]);
+
+  // Save the current session and refresh the sidebar chat list
+  const saveAndRefresh = useCallback(
+    async (chatId, msgs) => {
+      await saveSession(
+        { id: chatId, title: generateTitle(msgs), messages: msgs },
+        authApi?.getToken
+      );
+      const chats = await listSessions(authApi?.getToken);
+      setChatHistory(chats);
+    },
+    [authApi?.getToken]
+  );
 
   useEffect(() => {
     document.title = TITLE;
@@ -305,6 +322,7 @@ const AppContent = ({
     setActive: clerkApi?.setActive,
     activeChatId,
     setActiveChatId,
+    setChatHistory,
     onMessageSuccess: handleMessageSuccess,
     analyticsEnabled,
     onCanvasEvent: handleCanvasEvent,
@@ -317,23 +335,23 @@ const AppContent = ({
     setActiveChatId(null);
     setHasBegun(false);
     resetCanvas();
-    ChatHistoryManager.setActiveChat("");
+    setActiveChat("");
     window.scrollTo(0, 0);
     if (analyticsEnabled) trackNewChatStarted();
   }, [analyticsEnabled, resetCanvas, handleStop]);
 
   const handleSelectChat = useCallback(
-    (chatId) => {
+    async (chatId) => {
       handleStop();
       setIsLoading(false);
-      const chat = ChatHistoryManager.getChat(chatId);
+      const chat = await getSession(chatId, authApi?.getToken);
       if (chat) {
         isLoadingChatRef.current = true;
-        setMessages(chat.messages);
+        setMessages(chat.messages || []);
         setActiveChatId(chatId);
-        setHasBegun(chat.messages.length > 0);
+        setHasBegun((chat.messages || []).length > 0);
         resetCanvas();
-        ChatHistoryManager.setActiveChat(chatId);
+        setActiveChat(chatId);
         if (window.innerWidth < 768) {
           setIsSidebarOpen(false);
         }
@@ -341,19 +359,20 @@ const AppContent = ({
         if (analyticsEnabled) trackChatSelected(chatId);
       }
     },
-    [analyticsEnabled, resetCanvas, handleStop]
+    [analyticsEnabled, resetCanvas, handleStop, authApi?.getToken]
   );
 
   const handleDeleteChat = useCallback(
-    (chatId) => {
-      ChatHistoryManager.deleteChat(chatId);
-      setChatHistory(ChatHistoryManager.getAllChats());
+    async (chatId) => {
+      await deleteSession(chatId, authApi?.getToken);
+      const chats = await listSessions(authApi?.getToken);
+      setChatHistory(chats);
       if (analyticsEnabled) trackChatDeleted(chatId);
       if (chatId === activeChatId) {
         handleNewChat();
       }
     },
-    [activeChatId, handleNewChat, analyticsEnabled]
+    [activeChatId, handleNewChat, analyticsEnabled, authApi?.getToken]
   );
 
   const handleSidebarToggle = useCallback(() => {
@@ -516,11 +535,7 @@ const AppContent = ({
         });
 
         if (activeChatId) {
-          setMessages((prev) => {
-            ChatHistoryManager.updateChat(activeChatId, prev);
-            setChatHistory(ChatHistoryManager.getAllChats());
-            return prev;
-          });
+          saveAndRefresh(activeChatId, messagesRef.current);
         }
         setIsLoading(false);
         setShouldFocus(true);
@@ -537,10 +552,9 @@ const AppContent = ({
                 text: "\n\n*[Generation stopped]*",
               });
             }
-            if (activeChatId)
-              ChatHistoryManager.updateChat(activeChatId, updated);
             return updated;
           });
+          if (activeChatId) saveAndRefresh(activeChatId, messagesRef.current);
           setIsLoading(false);
           setShouldFocus(true);
           return;
@@ -565,6 +579,7 @@ const AppContent = ({
       clerkApi?.setActive,
       activeChatId,
       analyticsEnabled,
+      saveAndRefresh,
     ]
   );
 
@@ -718,11 +733,7 @@ const AppContent = ({
         });
 
         if (activeChatId) {
-          setMessages((prev) => {
-            ChatHistoryManager.updateChat(activeChatId, prev);
-            setChatHistory(ChatHistoryManager.getAllChats());
-            return prev;
-          });
+          saveAndRefresh(activeChatId, messagesRef.current);
         }
         setIsLoading(false);
         setRetryingIndex(null);
@@ -740,10 +751,9 @@ const AppContent = ({
                 text: "\n\n*[Generation stopped]*",
               });
             }
-            if (activeChatId)
-              ChatHistoryManager.updateChat(activeChatId, updated);
             return updated;
           });
+          if (activeChatId) saveAndRefresh(activeChatId, messagesRef.current);
           setIsLoading(false);
           setRetryingIndex(null);
           setShouldFocus(true);
@@ -770,6 +780,7 @@ const AppContent = ({
       clerkApi?.setActive,
       activeChatId,
       analyticsEnabled,
+      saveAndRefresh,
     ]
   );
 
@@ -816,6 +827,7 @@ const AppContent = ({
         onSelectChat={handleSelectChat}
         onNewChat={handleNewChat}
         onDeleteChat={handleDeleteChat}
+        onOpenFiles={() => setIsFileModalOpen(true)}
         user={userApi?.user}
         isOnPaidPlan={isOnPaidPlan}
         tierName={tierName}
@@ -828,6 +840,13 @@ const AppContent = ({
         open={showTierModal && TIER === "cycls_pass"}
         onClose={handleDismissTierModal}
         tier={TIER || "Pro"}
+      />
+
+      {/* File browser modal */}
+      <FileModal
+        open={isFileModalOpen}
+        onClose={() => setIsFileModalOpen(false)}
+        getToken={authApi?.getToken}
       />
 
       {/* Main content area - slides based on sidebar state and canvas */}

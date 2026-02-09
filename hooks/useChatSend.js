@@ -1,6 +1,7 @@
 import { useCallback, useRef } from "react";
 import { sendCyclsChatMessage } from "../services/api";
-import { ChatHistoryManager } from "../services/storage";
+import { setActiveChat, generateTitle } from "../services/storage";
+import { saveSession, listSessions } from "../services/sessions";
 import {
   trackMessageSent,
   trackChatCreated,
@@ -24,6 +25,7 @@ export const useChatSend = ({
   setActive,
   activeChatId,
   setActiveChatId,
+  setChatHistory,
   onMessageSuccess,
   analyticsEnabled,
   onCanvasEvent,
@@ -45,7 +47,7 @@ export const useChatSend = ({
       if (text === ":clear" && attachments.length === 0) {
         setMessages([]);
         setActiveChatId(null);
-        ChatHistoryManager.setActiveChat("");
+        setActiveChat("");
         window.scrollTo(0, 0);
         return;
       }
@@ -74,13 +76,15 @@ export const useChatSend = ({
       let chatId = activeChatId;
       const isNewChat = !chatId;
       if (!chatId) {
-        const newChat = ChatHistoryManager.createChat(newMessages);
-        chatId = newChat.id;
+        chatId = Date.now().toString();
         setActiveChatId(chatId);
         if (analyticsEnabled) trackChatCreated(chatId);
-      } else {
-        ChatHistoryManager.updateChat(chatId, newMessages);
       }
+      // Create session on server (sidebar refreshes after turn completes)
+      saveSession(
+        { id: chatId, title: generateTitle(newMessages), messages: newMessages },
+        getToken
+      );
 
       if (analyticsEnabled) {
         trackMessageSent({
@@ -284,7 +288,12 @@ export const useChatSend = ({
         });
 
         const finalMessages = [...newMessages, newAssistantMessage];
-        ChatHistoryManager.updateChat(chatId, finalMessages);
+        saveSession(
+          { id: chatId, title: generateTitle(finalMessages), messages: finalMessages },
+          getToken
+        ).then(() =>
+          listSessions(getToken).then((c) => setChatHistory(c))
+        );
 
         if (onMessageSuccess) {
           onMessageSuccess();
@@ -326,7 +335,7 @@ export const useChatSend = ({
                   lastMsg,
                 ]);
                 if (chatId) {
-                  ChatHistoryManager.updateChat(chatId, finalMessages);
+                  saveSession({ id: chatId, title: generateTitle(finalMessages), messages: finalMessages }, getToken);
                 }
               }
               return updated;
@@ -371,6 +380,7 @@ export const useChatSend = ({
       setActive,
       activeChatId,
       setActiveChatId,
+      setChatHistory,
       onMessageSuccess,
       analyticsEnabled,
       setMessages,
