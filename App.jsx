@@ -963,12 +963,14 @@ const AppContent = ({
 // Shell Component
 // ───────────────────────────────────────────────────────────────────────────────
 export const Shell = ({ meta }) => {
+  console.log(meta);
+
   const PROD = Boolean(meta.prod);
   const AUTH = Boolean(meta.auth);
   const HEADER = String(meta.header ?? "");
   const INTRO = String(meta.intro ?? "");
   const TITLE = String(meta.title ?? "AI Agent");
-  const TIER = meta.tier || null;
+  const TIER = meta.plan || null;
   const PUBLISHABLE_KEY = meta.pk;
   const ORG = meta.org || undefined;
 
