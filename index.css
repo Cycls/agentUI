@@ -207,6 +207,20 @@ body {
   margin-bottom: 10px;
 }
 
+/* Organization switcher - force text to respect theme colors */
+.clerk-theme-override .cl-organizationSwitcherTrigger {
+  color: var(--text-primary) !important;
+}
+
+.clerk-theme-override .cl-organizationSwitcherTrigger p,
+.clerk-theme-override .cl-organizationSwitcherTrigger span {
+  color: var(--text-primary) !important;
+}
+
+.clerk-theme-override .cl-organizationSwitcherTrigger svg {
+  color: var(--text-tertiary) !important;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════════
    SCROLLBAR STYLES
    ═══════════════════════════════════════════════════════════════════════════════ */
