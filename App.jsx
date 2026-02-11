@@ -9,8 +9,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import {
   ClerkProvider,
   UserButton,
+  OrganizationSwitcher,
   useAuth,
-  useClerk,
   useUser,
 } from "@clerk/clerk-react";
 
@@ -70,17 +70,15 @@ import {
 // ═══════════════════════════════════════════════════════════════════════════════
 //  App Component (Without Auth)
 // ═══════════════════════════════════════════════════════════════════════════════
-const AppWithoutAuth = ({ HEADER, INTRO, AUTH, ORG, TITLE, TIER }) => {
+const AppWithoutAuth = ({ HEADER, INTRO, AUTH, TITLE, TIER }) => {
   return (
     <AppContent
       HEADER={HEADER}
       INTRO={INTRO}
       AUTH={AUTH}
-      ORG={ORG}
       TITLE={TITLE}
       TIER={TIER}
       authApi={null}
-      clerkApi={null}
       userApi={{ user: null, isLoaded: true }}
       subscription={null}
       isSubscriptionLoading={false}
@@ -92,9 +90,8 @@ const AppWithoutAuth = ({ HEADER, INTRO, AUTH, ORG, TITLE, TIER }) => {
 // ═══════════════════════════════════════════════════════════════════════════════
 //  App Component (With Auth)
 // ═══════════════════════════════════════════════════════════════════════════════
-const AppWithAuth = ({ HEADER, INTRO, AUTH, ORG, TITLE, TIER }) => {
+const AppWithAuth = ({ HEADER, INTRO, AUTH, TITLE, TIER }) => {
   const authApi = useAuth();
-  const clerkApi = useClerk();
   const userApi = useUser();
 
   const {
@@ -108,11 +105,9 @@ const AppWithAuth = ({ HEADER, INTRO, AUTH, ORG, TITLE, TIER }) => {
       HEADER={HEADER}
       INTRO={INTRO}
       AUTH={AUTH}
-      ORG={ORG}
       TITLE={TITLE}
       TIER={TIER}
       authApi={authApi}
-      clerkApi={clerkApi}
       userApi={userApi}
       subscription={subscription}
       isSubscriptionLoading={isSubscriptionLoading}
@@ -139,11 +134,9 @@ const AppContent = ({
   HEADER,
   INTRO,
   AUTH,
-  ORG,
   TITLE,
   TIER,
   authApi,
-  clerkApi,
   userApi,
   subscription,
   isSubscriptionLoading,
@@ -197,6 +190,12 @@ const AppContent = ({
   const tierName = useMemo(() => {
     if (!subscription) return null;
     return subscription?.subscriptionItems?.[0]?.plan?.name || null;
+  }, [subscription]);
+
+  const planInfo = useMemo(() => {
+    const plan = subscription?.subscriptionItems?.[0]?.plan;
+    if (!plan) return null;
+    return { plan_name: plan.name, plan_id: plan.id, plan_slug: plan.slug };
   }, [subscription]);
 
   // PostHog identify hook - safely receives user data as props
@@ -317,9 +316,8 @@ const AppContent = ({
     setIsUserScrolled,
     onFirstSend: () => setHasBegun(true),
     auth: AUTH,
-    org: ORG,
     getToken: authApi?.getToken,
-    setActive: clerkApi?.setActive,
+    plan: planInfo,
     activeChatId,
     setActiveChatId,
     setChatHistory,
@@ -436,8 +434,7 @@ const AppContent = ({
           messages: contextMessages,
           auth: AUTH,
           getToken: authApi?.getToken,
-          setActive: clerkApi?.setActive,
-          org: ORG,
+          plan: planInfo,
           onPart: (item) => {
             resetTimeout();
 
@@ -574,9 +571,8 @@ const AppContent = ({
     [
       messages,
       AUTH,
-      ORG,
       authApi?.getToken,
-      clerkApi?.setActive,
+      planInfo,
       activeChatId,
       analyticsEnabled,
       saveAndRefresh,
@@ -634,8 +630,7 @@ const AppContent = ({
           messages: contextMessages,
           auth: AUTH,
           getToken: authApi?.getToken,
-          setActive: clerkApi?.setActive,
-          org: ORG,
+          plan: planInfo,
           onPart: (item) => {
             resetTimeout();
 
@@ -775,9 +770,8 @@ const AppContent = ({
     [
       messages,
       AUTH,
-      ORG,
       authApi?.getToken,
-      clerkApi?.setActive,
+      planInfo,
       activeChatId,
       analyticsEnabled,
       saveAndRefresh,
@@ -800,6 +794,20 @@ const AppContent = ({
         elements: {
           avatarBox: "w-6 h-6",
           userButtonTrigger: "focus:shadow-none",
+        },
+      }}
+    />
+  ) : null;
+
+  const orgSwitcherComponent = AUTH ? (
+    <OrganizationSwitcher
+      hidePersonal={false}
+      appearance={{
+        elements: {
+          rootBox: "w-full",
+          organizationSwitcherTrigger:
+            "focus:shadow-none w-full justify-between gap-2 px-0 rounded-lg transition-colors",
+          organizationPreviewMainIdentifier: "font-semibold",
         },
       }}
     />
@@ -832,6 +840,7 @@ const AppContent = ({
         isOnPaidPlan={isOnPaidPlan}
         tierName={tierName}
         UserButtonComponent={userButtonComponent}
+        OrgSwitcherComponent={orgSwitcherComponent}
         isAuthenticated={AUTH}
       />
 
@@ -972,8 +981,6 @@ export const Shell = ({ meta }) => {
   const TITLE = String(meta.title ?? "AI Agent");
   const TIER = meta.plan || null;
   const PUBLISHABLE_KEY = meta.pk;
-  const ORG = meta.org || undefined;
-
   const AFTER_URL =
     typeof window !== "undefined" ? window.location.origin + "/" : "/";
 
@@ -983,7 +990,6 @@ export const Shell = ({ meta }) => {
         HEADER={HEADER}
         INTRO={INTRO}
         AUTH={AUTH}
-        ORG={ORG}
         TITLE={TITLE}
         TIER={TIER}
       />
@@ -1001,7 +1007,7 @@ export const Shell = ({ meta }) => {
 
   return (
     <ClerkProvider publishableKey={PUBLISHABLE_KEY} {...clerkProps}>
-      <SubscriptionProvider tier={TIER}>
+      <SubscriptionProvider>
         <BrowserRouter>
           <Routes>
             <Route path="/auth" element={<AuthPage afterUrl={AFTER_URL} />} />
@@ -1013,7 +1019,6 @@ export const Shell = ({ meta }) => {
                     HEADER={HEADER}
                     INTRO={INTRO}
                     AUTH={AUTH}
-                    ORG={ORG}
                     TITLE={TITLE}
                     TIER={TIER}
                   />
