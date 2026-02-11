@@ -1,4 +1,11 @@
-import { useMemo, useState, useRef, useEffect, useId, useCallback } from "react";
+import {
+  useMemo,
+  useState,
+  useRef,
+  useEffect,
+  useId,
+  useCallback,
+} from "react";
 import { CONFIG } from "../clientConfig";
 import { getPinnedChats, pinChat, unpinChat } from "../services/storage";
 
@@ -206,7 +213,16 @@ const SectionLabel = ({ children }) => (
   </div>
 );
 
-const ChatItem = ({ chat, isActive, isPinned, onSelect, onDelete, onPin, onUnpin, pinLimitReached }) => {
+const ChatItem = ({
+  chat,
+  isActive,
+  isPinned,
+  onSelect,
+  onDelete,
+  onPin,
+  onUnpin,
+  pinLimitReached,
+}) => {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
   const btnRef = useRef(null);
@@ -230,7 +246,10 @@ const ChatItem = ({ chat, isActive, isPinned, onSelect, onDelete, onPin, onUnpin
         aria-current={isActive ? "page" : undefined}
       >
         {isPinned && (
-          <span className="shrink-0 opacity-40" style={{ color: "var(--text-tertiary)" }}>
+          <span
+            className="shrink-0 opacity-40"
+            style={{ color: "var(--text-tertiary)" }}
+          >
             <PinIcon />
           </span>
         )}
@@ -344,42 +363,127 @@ const ChatItem = ({ chat, isActive, isPinned, onSelect, onDelete, onPin, onUnpin
   );
 };
 
+const SettingsIcon = (props) => (
+  <svg
+    aria-hidden="true"
+    viewBox="0 0 24 24"
+    className={cx("w-[18px] h-[18px]", props?.className)}
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.7"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+// ── User Profile (Expanded Sidebar) ──
+// OrgSwitcher shows the avatar + org/account name on its own row.
+// Settings row programmatically clicks the hidden Clerk UserButton.
 const UserProfileExpanded = ({
   user,
   isOnPaidPlan,
   tierName,
   UserButtonComponent,
+  OrgSwitcherComponent,
+  onSettingsClick,
 }) => {
-  const displayName =
-    user?.fullName ||
-    user?.firstName ||
-    user?.emailAddresses?.[0]?.emailAddress ||
-    "User";
   const subscriptionLabel = isOnPaidPlan ? tierName || "Pro" : "Free plan";
 
   return (
-    <div className="flex items-center gap-3 rounded-xl p-2 hover:bg-[var(--bg-hover)] transition-colors theme-transition">
-      <div className="shrink-0">{UserButtonComponent}</div>
-      <div className="min-w-0 flex-1">
+    <div className="space-y-1">
+      {/* Organization Switcher — full-width, shows avatar + org name */}
+      {OrgSwitcherComponent && (
         <div
-          className="truncate text-sm font-semibold"
+          className="rounded-xl px-1.5 py-1 clerk-theme-override overflow-hidden"
           style={{ color: "var(--text-primary)" }}
         >
-          {displayName}
+          {OrgSwitcherComponent}
         </div>
-        <div
-          className="truncate text-xs"
-          style={{ color: "var(--text-tertiary)" }}
+      )}
+
+      {/* Fallback: show name if no OrgSwitcher */}
+      {!OrgSwitcherComponent && (
+        <div className="flex items-center gap-2.5 rounded-xl px-2 py-1.5">
+          <div className="shrink-0">{UserButtonComponent}</div>
+          <div className="min-w-0 flex-1">
+            <div
+              className="truncate text-sm font-medium leading-tight"
+              style={{ color: "var(--text-primary)" }}
+            >
+              {user?.fullName ||
+                user?.firstName ||
+                user?.emailAddresses?.[0]?.emailAddress ||
+                "User"}
+            </div>
+            <div
+              className="truncate text-xs leading-tight mt-0.5"
+              style={{ color: "var(--text-tertiary)" }}
+            >
+              {subscriptionLabel}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Settings row — clicking triggers the hidden Clerk UserButton */}
+      {OrgSwitcherComponent && (
+        <button
+          type="button"
+          onClick={onSettingsClick}
+          className={cx(
+            "w-full flex items-center gap-2.5 rounded-xl px-1 py-2 text-left",
+            "hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)]",
+            "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]/20",
+            "transition-colors theme-transition"
+          )}
         >
-          {subscriptionLabel}
-        </div>
-      </div>
+          <span
+            className="shrink-0 grid place-items-center w-7 h-7"
+            style={{ color: "var(--text-primary)" }}
+          >
+            <SettingsIcon />
+          </span>
+          <div className="min-w-0 flex-1 flex items-center justify-between">
+            <span
+              className="text-sm font-medium"
+              style={{ color: "var(--text-primary)" }}
+            >
+              Settings
+            </span>
+            <span className="text-xs" style={{ color: "var(--text-tertiary)" }}>
+              {subscriptionLabel}
+            </span>
+          </div>
+        </button>
+      )}
     </div>
   );
 };
 
-const UserProfileCollapsed = ({ UserButtonComponent }) => (
-  <div className="grid place-items-center p-1">{UserButtonComponent}</div>
+// ── User Profile (Collapsed Sidebar) ──
+// Settings gear icon that triggers the hidden Clerk UserButton.
+const UserProfileCollapsed = ({ onSettingsClick }) => (
+  <div className="flex flex-col items-center py-1">
+    <button
+      type="button"
+      onClick={onSettingsClick}
+      className={cx(
+        "rounded-xl p-2",
+        "hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)]",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--text-primary)]/20",
+        "transition-colors theme-transition"
+      )}
+      style={{ color: "var(--text-primary)" }}
+      title="Settings"
+    >
+      <IconWrap>
+        <SettingsIcon />
+      </IconWrap>
+    </button>
+  </div>
 );
 
 // ── Main Sidebar ──
@@ -397,6 +501,7 @@ export const ChatHistorySidebar = ({
   isOnPaidPlan,
   tierName,
   UserButtonComponent,
+  OrgSwitcherComponent,
   isAuthenticated,
 }) => {
   const [pinnedIds, setPinnedIds] = useState(() => getPinnedChats());
@@ -461,6 +566,15 @@ export const ChatHistorySidebar = ({
 
   const pinLimitReached = pinnedIds.length >= 3;
 
+  // Ref to the hidden Clerk UserButton — we programmatically click it
+  const clerkUserBtnRef = useRef(null);
+
+  const handleSettingsClick = useCallback(() => {
+    // Find and click the actual Clerk UserButton trigger inside the hidden container
+    const btn = clerkUserBtnRef.current?.querySelector("button");
+    if (btn) btn.click();
+  }, []);
+
   const renderChatItem = (chat) => (
     <ChatItem
       key={chat.id}
@@ -480,9 +594,7 @@ export const ChatHistorySidebar = ({
     return (
       <div className="mb-4">
         <SectionLabel>{title}</SectionLabel>
-        <div className="space-y-1">
-          {list.map(renderChatItem)}
-        </div>
+        <div className="space-y-1">{list.map(renderChatItem)}</div>
       </div>
     );
   };
@@ -623,12 +735,34 @@ export const ChatHistorySidebar = ({
             style={{ borderTop: "1px solid var(--border-primary)" }}
           >
             {isAuthenticated && user ? (
-              <UserProfileExpanded
-                user={user}
-                isOnPaidPlan={isOnPaidPlan}
-                tierName={tierName}
-                UserButtonComponent={UserButtonComponent}
-              />
+              <>
+                <UserProfileExpanded
+                  user={user}
+                  isOnPaidPlan={isOnPaidPlan}
+                  tierName={tierName}
+                  UserButtonComponent={UserButtonComponent}
+                  OrgSwitcherComponent={OrgSwitcherComponent}
+                  onSettingsClick={handleSettingsClick}
+                />
+                {/* Hidden Clerk UserButton — rendered off-screen, clicked programmatically */}
+                {OrgSwitcherComponent && UserButtonComponent && (
+                  <div
+                    ref={clerkUserBtnRef}
+                    aria-hidden="true"
+                    className="absolute overflow-hidden"
+                    style={{
+                      width: 0,
+                      height: 0,
+                      opacity: 0,
+                      pointerEvents: "none",
+                      bottom: 44,
+                      left: 17,
+                    }}
+                  >
+                    {UserButtonComponent}
+                  </div>
+                )}
+              </>
             ) : (
               <div
                 className="px-2 py-2 text-center text-xs"
@@ -700,7 +834,7 @@ export const ChatHistorySidebar = ({
               className="p-2"
               style={{ borderTop: "1px solid var(--border-primary)" }}
             >
-              <UserProfileCollapsed UserButtonComponent={UserButtonComponent} />
+              <UserProfileCollapsed onSettingsClick={handleSettingsClick} />
             </div>
           )}
         </div>
