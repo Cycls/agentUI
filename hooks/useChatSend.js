@@ -20,9 +20,8 @@ export const useChatSend = ({
   setIsUserScrolled,
   onFirstSend,
   auth,
-  org,
   getToken,
-  setActive,
+  plan,
   activeChatId,
   setActiveChatId,
   setChatHistory,
@@ -125,8 +124,7 @@ export const useChatSend = ({
           messages: newMessages,
           auth,
           getToken,
-          setActive,
-          org,
+          plan,
           onPart: (item) => {
             // Reset timeout on every chunk received
             resetTimeout();
@@ -375,9 +373,8 @@ export const useChatSend = ({
     [
       messages,
       auth,
-      org,
       getToken,
-      setActive,
+      plan,
       activeChatId,
       setActiveChatId,
       setChatHistory,

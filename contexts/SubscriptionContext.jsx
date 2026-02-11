@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useMemo } from "react";
 import { useSubscription } from "@clerk/clerk-react/experimental";
+import { useOrganization } from "@clerk/clerk-react";
 
 // ───────────────────────────────────────────────────────────────────────────────
 // Subscription Context - to share subscription state from Clerk when AUTH enabled
@@ -14,17 +15,17 @@ const SubscriptionContext = createContext({
 export const useSubscriptionContext = () => useContext(SubscriptionContext);
 
 // ───────────────────────────────────────────────────────────────────────────────
-// Subscription Provider - only renders when inside ClerkProvider
+// Subscription Provider - checks org subscription when active, else personal
 // ───────────────────────────────────────────────────────────────────────────────
-export const SubscriptionProvider = ({ tier, children }) => {
+export const SubscriptionProvider = ({ children }) => {
+  const { organization } = useOrganization();
+
   const {
     data: subscription,
     isLoading,
     error,
     revalidate,
-  } = useSubscription({
-    enabled: tier === "cycls_pass",
-  });
+  } = useSubscription(organization ? { for: "organization" } : {});
 
   const value = useMemo(
     () => ({

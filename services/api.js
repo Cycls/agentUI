@@ -25,8 +25,6 @@ export async function sendChatMessage({
   messages,
   auth,
   getToken,
-  setActive,
-  org,
   onDelta,
   signal,
 }) {
@@ -67,13 +65,6 @@ export async function sendChatMessage({
     try {
       const sessionToken = await getToken({ template: "template" });
       if (sessionToken) headers["Authorization"] = "Bearer " + sessionToken;
-      if (setActive && org) {
-        try {
-          await setActive({ organization: org });
-        } catch (_error) {
-          // Silently ignore setActive errors
-        }
-      }
     } catch (_error) {
       // Silently ignore getToken errors
     }
@@ -124,8 +115,7 @@ export async function sendCyclsChatMessage({
   messages,
   auth,
   getToken,
-  setActive,
-  org,
+  plan,
   onPart,
   signal,
 }) {
@@ -204,13 +194,6 @@ export async function sendCyclsChatMessage({
     try {
       const sessionToken = await getToken({ template: "template" });
       if (sessionToken) headers["Authorization"] = "Bearer " + sessionToken;
-      if (setActive && org) {
-        try {
-          await setActive({ organization: org });
-        } catch (_error) {
-          // Silently ignore setActive errors
-        }
-      }
     } catch (_error) {
       // Silently ignore getToken errors
     }
@@ -219,7 +202,7 @@ export async function sendCyclsChatMessage({
   const response = await fetch("/chat/cycls", {
     method: "POST",
     headers,
-    body: JSON.stringify({ messages: context }),
+    body: JSON.stringify({ messages: context, ...(plan && { plan }) }),
     signal,
   });
 
