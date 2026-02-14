@@ -992,7 +992,6 @@ const AppContent = ({
 // Shell Component
 // ───────────────────────────────────────────────────────────────────────────────
 export const Shell = ({ meta }) => {
-  const PROD = Boolean(meta.prod);
   const AUTH = Boolean(meta.auth);
   const HEADER = String(meta.header ?? "");
   const INTRO = String(meta.intro ?? "");
@@ -1014,14 +1013,10 @@ export const Shell = ({ meta }) => {
     );
   }
 
-  const clerkProps = PROD
-    ? {
-        isSatellite: false,
-        domain: "cycls.ai",
-        fallbackRedirectUrl: AFTER_URL,
-        forceRedirectUrl: AFTER_URL,
-      }
-    : { fallbackRedirectUrl: AFTER_URL, forceRedirectUrl: AFTER_URL };
+  const clerkProps = {
+    fallbackRedirectUrl: AFTER_URL,
+    forceRedirectUrl: AFTER_URL,
+  };
 
   return (
     <ClerkProvider publishableKey={PUBLISHABLE_KEY} {...clerkProps}>
