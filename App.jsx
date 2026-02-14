@@ -11,6 +11,7 @@ import {
   UserButton,
   OrganizationSwitcher,
   useAuth,
+  useOrganization,
   useUser,
 } from "@clerk/clerk-react";
 
@@ -80,6 +81,7 @@ const AppWithoutAuth = ({ HEADER, INTRO, AUTH, TITLE, TIER }) => {
       TIER={TIER}
       authApi={null}
       userApi={{ user: null, isLoaded: true }}
+      orgId={null}
       subscription={null}
       isSubscriptionLoading={false}
       subscriptionError={null}
@@ -93,6 +95,7 @@ const AppWithoutAuth = ({ HEADER, INTRO, AUTH, TITLE, TIER }) => {
 const AppWithAuth = ({ HEADER, INTRO, AUTH, TITLE, TIER }) => {
   const authApi = useAuth();
   const userApi = useUser();
+  const { organization } = useOrganization();
 
   const {
     subscription,
@@ -109,6 +112,7 @@ const AppWithAuth = ({ HEADER, INTRO, AUTH, TITLE, TIER }) => {
       TIER={TIER}
       authApi={authApi}
       userApi={userApi}
+      orgId={organization?.id || null}
       subscription={subscription}
       isSubscriptionLoading={isSubscriptionLoading}
       subscriptionError={subscriptionError}
@@ -138,6 +142,7 @@ const AppContent = ({
   TIER,
   authApi,
   userApi,
+  orgId,
   subscription,
   isSubscriptionLoading,
   subscriptionError,
@@ -225,6 +230,19 @@ const AppContent = ({
     // Load chat history from server
     listSessions(authApi?.getToken).then((chats) => setChatHistory(chats));
   }, []);
+
+  // Re-fetch sessions when the active organization changes
+  const prevOrgIdRef = useRef(orgId);
+  useEffect(() => {
+    if (prevOrgIdRef.current === orgId) return;
+    prevOrgIdRef.current = orgId;
+
+    // Clear current chat and reload sessions for the new org context
+    setMessages([]);
+    setActiveChatId(null);
+    setHasBegun(false);
+    listSessions(authApi?.getToken).then((chats) => setChatHistory(chats));
+  }, [orgId, authApi?.getToken]);
 
   useEffect(() => {
     messagesRef.current = messages;
@@ -972,8 +990,6 @@ const AppContent = ({
 // Shell Component
 // ───────────────────────────────────────────────────────────────────────────────
 export const Shell = ({ meta }) => {
-  console.log(meta);
-
   const PROD = Boolean(meta.prod);
   const AUTH = Boolean(meta.auth);
   const HEADER = String(meta.header ?? "");
