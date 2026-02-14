@@ -14,11 +14,11 @@ export function StreamingIndicator({ className = "" }) {
   // Determine the text to display based on elapsed time
   const getText = () => {
     if (elapsedSeconds < 2) {
-      return "Cycling...";
+      return <><strong>Cycls</strong>{"\u2026"}</>;
     } else if (elapsedSeconds < 4) {
-      return "Cycling...(thinking)";
+      return <><strong>Cycls</strong>{"\u2026 (thinking)"}</>;
     } else {
-      return `Cycling...(thinking ${elapsedSeconds - 4}s)`;
+      return <><strong>Cycls</strong>{`\u2026 (thinking ${elapsedSeconds - 4}s)`}</>;
     }
   };
 
