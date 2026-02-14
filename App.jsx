@@ -820,6 +820,8 @@ const AppContent = ({
   const orgSwitcherComponent = AUTH ? (
     <OrganizationSwitcher
       hidePersonal={false}
+      afterCreateOrganizationUrl="/"
+      afterSelectOrganizationUrl="/"
       appearance={{
         elements: {
           rootBox: "w-full",
