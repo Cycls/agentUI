@@ -369,6 +369,7 @@ const styles = `
   .file-actions {
     display: flex; align-items: center; gap: 1px;
     opacity: 0; transition: opacity 0.12s; flex-shrink: 0;
+    min-width: 80px; justify-content: flex-end;
   }
   .file-row:hover .file-actions { opacity: 1; }
   .action-btn {
