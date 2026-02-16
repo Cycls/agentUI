@@ -12,8 +12,12 @@ export const AuthPage = ({ afterUrl }) => {
   const { resolvedTheme } = useTheme();
 
   // Derive mode from location.hash instead of using state
+  // Treat verification and sign-up hashes as sign-up mode
   const mode =
-    location.hash === "#sign-up/" || location.hash === "#sign-up"
+    location.hash === "#sign-up/" ||
+    location.hash === "#sign-up" ||
+    location.hash.startsWith("#/verify-") ||
+    location.hash.startsWith("#/sso-callback")
       ? "sign-up"
       : "sign-in";
 
