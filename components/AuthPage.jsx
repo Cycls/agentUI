@@ -57,6 +57,7 @@ export const AuthPage = ({ afterUrl }) => {
             <SignIn
               routing="virtual"
               fallbackRedirectUrl={afterUrl}
+              forceRedirectUrl={afterUrl}
               signUpUrl="#sign-up"
               appearance={sharedAppearance}
             />
@@ -78,6 +79,7 @@ export const AuthPage = ({ afterUrl }) => {
             <SignUp
               routing="virtual"
               fallbackRedirectUrl={afterUrl}
+              forceRedirectUrl={afterUrl}
               signInUrl="#sign-in"
               appearance={sharedAppearance}
             />
