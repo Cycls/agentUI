@@ -1,8 +1,6 @@
 import { useEffect, useRef, useMemo } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import Placeholder from "@tiptap/extension-placeholder";
-import Typography from "@tiptap/extension-typography";
 import { useCanvas } from "../../contexts/CanvasContext";
 
 // ───────────────────────────────────────────────────────────────────────────────
@@ -72,7 +70,7 @@ function detectRTL(text) {
 }
 
 // ───────────────────────────────────────────────────────────────────────────────
-// Canvas Editor - Tiptap integration
+// Canvas Renderer - Read-only Tiptap display
 // ───────────────────────────────────────────────────────────────────────────────
 export const CanvasEditor = () => {
   const { state } = useCanvas();
@@ -86,22 +84,14 @@ export const CanvasEditor = () => {
           levels: [1, 2, 3],
         },
       }),
-      Placeholder.configure({
-        placeholder: "Document content will appear here...",
-      }),
-      Typography,
     ],
     content: markdownToHtml(state.content),
-    editable: !state.isStreaming,
+    editable: false,
     editorProps: {
       attributes: {
         class: "prose prose-sm max-w-none focus:outline-none min-h-full",
         dir: isRTL ? "rtl" : "ltr",
       },
-    },
-    onUpdate: () => {
-      // User edits are tracked by Tiptap internally
-      // Could be enhanced to sync back to context if needed
     },
   });
 
@@ -125,17 +115,6 @@ export const CanvasEditor = () => {
       }
     }
   }, [editor, state.content, state.isStreaming]);
-
-  // Update editable state when streaming completes
-  useEffect(() => {
-    if (!editor || editor.isDestroyed) return;
-
-    try {
-      editor.setEditable(!state.isStreaming);
-    } catch (e) {
-      console.error("Error setting editable state:", e);
-    }
-  }, [editor, state.isStreaming]);
 
   // Update RTL direction when content changes
   useEffect(() => {
