@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useCanvas } from "../../contexts/CanvasContext";
 import { CanvasExportMenu } from "./CanvasExportMenu";
 
@@ -61,31 +61,7 @@ const StreamingDots = () => (
 );
 
 export const CanvasHeader = ({ closeButtonRef }) => {
-  const { state, closeCanvas, updateContent } = useCanvas();
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [editedTitle, setEditedTitle] = useState(state.title);
-
-  const handleTitleClick = () => {
-    if (state.isDone) {
-      setEditedTitle(state.title);
-      setIsEditingTitle(true);
-    }
-  };
-
-  const handleTitleBlur = () => {
-    setIsEditingTitle(false);
-    // Title editing would need to be added to context if needed
-  };
-
-  const handleTitleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      setIsEditingTitle(false);
-    } else if (e.key === "Escape") {
-      setEditedTitle(state.title);
-      setIsEditingTitle(false);
-    }
-  };
+  const { state, closeCanvas } = useCanvas();
 
   return (
     <div
@@ -101,29 +77,13 @@ export const CanvasHeader = ({ closeButtonRef }) => {
           <DocumentIcon />
         </div>
 
-        {isEditingTitle ? (
-          <input
-            type="text"
-            value={editedTitle}
-            onChange={(e) => setEditedTitle(e.target.value)}
-            onBlur={handleTitleBlur}
-            onKeyDown={handleTitleKeyDown}
-            autoFocus
-            className="text-base font-medium bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)] rounded px-1 min-w-0 flex-1"
-            style={{ color: "var(--text-primary)" }}
-          />
-        ) : (
-          <h2
-            onClick={handleTitleClick}
-            className={`text-base font-medium truncate ${
-              state.isDone ? "cursor-text hover:bg-[var(--bg-hover)] rounded px-1 -mx-1" : ""
-            }`}
-            style={{ color: "var(--text-primary)" }}
-            title={state.title}
-          >
-            {state.title || "Untitled"}
-          </h2>
-        )}
+        <h2
+          className="text-base font-medium truncate"
+          style={{ color: "var(--text-primary)" }}
+          title={state.title}
+        >
+          {state.title || "Untitled"}
+        </h2>
 
         {/* Streaming indicator */}
         {state.isStreaming && (
