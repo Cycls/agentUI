@@ -24,7 +24,7 @@ const CanvasActions = {
   OPEN_EXISTING: "OPEN_EXISTING",
   CLOSE: "CLOSE",
   APPEND_CONTENT: "APPEND_CONTENT",
-  UPDATE_CONTENT: "UPDATE_CONTENT",
+
   DONE: "DONE",
   RESET: "RESET",
 };
@@ -66,13 +66,6 @@ function canvasReducer(state, action) {
         content: state.content + (action.payload || ""),
       };
 
-    case CanvasActions.UPDATE_CONTENT:
-      // For user edits after streaming is complete
-      return {
-        ...state,
-        content: action.payload || "",
-      };
-
     case CanvasActions.DONE:
       return {
         ...state,
@@ -95,7 +88,7 @@ const CanvasContext = createContext({
   openExistingCanvas: () => {},
   closeCanvas: () => {},
   appendContent: () => {},
-  updateContent: () => {},
+
   markDone: () => {},
   resetCanvas: () => {},
 });
@@ -121,10 +114,6 @@ export const CanvasProvider = ({ children }) => {
     dispatch({ type: CanvasActions.APPEND_CONTENT, payload: content });
   }, []);
 
-  const updateContent = useCallback((content) => {
-    dispatch({ type: CanvasActions.UPDATE_CONTENT, payload: content });
-  }, []);
-
   const markDone = useCallback(() => {
     dispatch({ type: CanvasActions.DONE });
   }, []);
@@ -141,7 +130,6 @@ export const CanvasProvider = ({ children }) => {
       openExistingCanvas,
       closeCanvas,
       appendContent,
-      updateContent,
       markDone,
       resetCanvas,
     }),
@@ -151,7 +139,6 @@ export const CanvasProvider = ({ children }) => {
       openExistingCanvas,
       closeCanvas,
       appendContent,
-      updateContent,
       markDone,
       resetCanvas,
     ]
