@@ -404,110 +404,16 @@ body {
   transform: translateX(0);
 }
 
-/* Canvas editor styling */
-.canvas-editor .ProseMirror {
-  min-height: calc(100vh - 120px);
-  outline: none;
-}
-
-.canvas-editor .ProseMirror:focus {
-  outline: none;
-}
-
-.canvas-editor .ProseMirror p.is-editor-empty:first-child::before {
-  color: var(--text-muted);
-  content: attr(data-placeholder);
-  float: left;
-  height: 0;
-  pointer-events: none;
-}
-
-/* Canvas prose styling */
-.canvas-editor .ProseMirror h1 {
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
-  color: var(--text-primary);
-}
-
-.canvas-editor .ProseMirror h2 {
-  font-size: 1.375rem;
-  font-weight: 600;
-  margin-top: 1.25rem;
-  margin-bottom: 0.5rem;
-  color: var(--text-primary);
-}
-
-.canvas-editor .ProseMirror h3 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
-  color: var(--text-primary);
-}
-
-.canvas-editor .ProseMirror p {
-  margin-bottom: 0.75rem;
-  line-height: 1.7;
-  color: var(--text-primary);
-}
-
-.canvas-editor .ProseMirror ul,
-.canvas-editor .ProseMirror ol {
-  padding-left: 1.5rem;
-  margin-bottom: 0.75rem;
-}
-
-.canvas-editor .ProseMirror li {
-  margin-bottom: 0.25rem;
-}
-
-.canvas-editor .ProseMirror blockquote {
-  border-left: 3px solid var(--border-primary);
-  padding-left: 1rem;
-  margin-left: 0;
-  font-style: italic;
-  color: var(--text-secondary);
-}
-
-.canvas-editor .ProseMirror code {
-  background-color: var(--code-bg);
-  color: var(--code-text);
-  padding: 0.125rem 0.375rem;
-  border-radius: 0.25rem;
-  font-size: 0.875em;
-}
-
-.canvas-editor .ProseMirror pre {
-  background-color: var(--code-bg);
-  color: var(--code-text);
-  padding: 1rem;
-  border-radius: 0.5rem;
-  overflow-x: auto;
-  margin-bottom: 0.75rem;
-}
-
-.canvas-editor .ProseMirror pre code {
-  background: none;
-  padding: 0;
-}
-
-.canvas-editor .ProseMirror a {
-  color: var(--accent-primary);
-  text-decoration: underline;
-}
-
-.canvas-editor .ProseMirror hr {
-  border: none;
-  border-top: 1px solid var(--border-primary);
-  margin: 1.5rem 0;
-}
 
 /* Streaming cursor animation */
 @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
 
 .canvas-editor .streaming-cursor {
@@ -629,7 +535,8 @@ body {
 }
 
 @keyframes stepShimmer {
-  0%, 100% {
+  0%,
+  100% {
     background-position: 200% 0;
   }
   50% {
@@ -666,7 +573,11 @@ body {
 }
 
 @keyframes stepBlink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
 }
-
