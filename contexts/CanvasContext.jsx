@@ -24,7 +24,7 @@ const CanvasActions = {
   OPEN_EXISTING: "OPEN_EXISTING",
   CLOSE: "CLOSE",
   APPEND_CONTENT: "APPEND_CONTENT",
-
+  SET_CONTENT: "SET_CONTENT",
   DONE: "DONE",
   RESET: "RESET",
 };
@@ -66,6 +66,12 @@ function canvasReducer(state, action) {
         content: state.content + (action.payload || ""),
       };
 
+    case CanvasActions.SET_CONTENT:
+      return {
+        ...state,
+        content: action.payload || "",
+      };
+
     case CanvasActions.DONE:
       return {
         ...state,
@@ -88,7 +94,7 @@ const CanvasContext = createContext({
   openExistingCanvas: () => {},
   closeCanvas: () => {},
   appendContent: () => {},
-
+  setContent: () => {},
   markDone: () => {},
   resetCanvas: () => {},
 });
@@ -114,6 +120,10 @@ export const CanvasProvider = ({ children }) => {
     dispatch({ type: CanvasActions.APPEND_CONTENT, payload: content });
   }, []);
 
+  const setContent = useCallback((content) => {
+    dispatch({ type: CanvasActions.SET_CONTENT, payload: content });
+  }, []);
+
   const markDone = useCallback(() => {
     dispatch({ type: CanvasActions.DONE });
   }, []);
@@ -130,6 +140,7 @@ export const CanvasProvider = ({ children }) => {
       openExistingCanvas,
       closeCanvas,
       appendContent,
+      setContent,
       markDone,
       resetCanvas,
     }),
@@ -139,6 +150,7 @@ export const CanvasProvider = ({ children }) => {
       openExistingCanvas,
       closeCanvas,
       appendContent,
+      setContent,
       markDone,
       resetCanvas,
     ]
