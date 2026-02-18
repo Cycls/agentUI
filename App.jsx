@@ -152,6 +152,7 @@ const AppContent = ({
     state: canvasState,
     openCanvas,
     appendContent,
+    setContent,
     markDone,
     closeCanvas,
     resetCanvas,
@@ -325,6 +326,32 @@ const AppContent = ({
     },
     [openCanvas, appendContent, markDone, closeCanvas]
   );
+
+  // Sync canvas content from message parts so edits are reflected live.
+  // When the agent updates canvas content in a new turn, the message parts
+  // get the latest content. This effect pushes it to the canvas context.
+  useEffect(() => {
+    if (!canvasState.isOpen || canvasState.isStreaming) return;
+
+    // Find the latest complete canvas part across all messages
+    let latestCanvas = null;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const msg = messages[i];
+      if (msg.parts) {
+        for (let j = msg.parts.length - 1; j >= 0; j--) {
+          if (msg.parts[j].type === "canvas" && msg.parts[j]._complete) {
+            latestCanvas = msg.parts[j];
+            break;
+          }
+        }
+        if (latestCanvas) break;
+      }
+    }
+
+    if (latestCanvas && latestCanvas.content !== canvasState.content) {
+      setContent(latestCanvas.content);
+    }
+  }, [messages, canvasState.isOpen, canvasState.isStreaming, canvasState.content, setContent]);
 
   const { send, handleStop } = useChatSend({
     messages,
