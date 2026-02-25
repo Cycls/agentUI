@@ -980,6 +980,7 @@ const AppContent = ({
                 onRetry={handleRetry}
                 retryingIndex={retryingIndex}
                 isGenerating={isLoading}
+                getToken={authApi?.getToken}
               />
               <div ref={messagesEndRef} />
             </div>

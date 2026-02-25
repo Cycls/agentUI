@@ -1,4 +1,5 @@
 import { CONFIG } from "../clientConfig";
+import { authFetch } from "../services/authFetch";
 
 // Extract and remove the manifest from message content
 function extractAttachmentsFromContent(content) {
@@ -27,37 +28,29 @@ function fileKind(mime) {
   return "file";
 }
 
-// Upload a single file via the attachments API
+// Upload a single file via the files API
 async function uploadOne(file, getToken) {
   if (file.size > CONFIG.MAX_FILE_BYTES)
     throw new Error("File too large (max 10MB)");
   // All file types accepted
 
+  const safeName = `${Date.now()}_${file.name}`;
+  const fullPath = `chat-attachments/${safeName}`;
+
   const fd = new FormData();
   fd.append("file", file);
 
-  const headers = {};
-  if (getToken) {
-    const token = await getToken({ template: "template" });
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-  }
-
-  const res = await fetch("/attachments", {
-    method: "POST",
-    headers,
-    body: fd,
-  });
+  const res = await authFetch(
+    `/files/${encodeURIComponent(fullPath)}`,
+    { method: "PUT", body: fd },
+    getToken
+  );
 
   if (!res.ok) throw new Error(`Upload failed (${res.status})`);
 
-  const data = await res.json(); // { url: "https://...signed-url.../photo.png" }
-
-  // Return metadata compatible with existing attachment format
   return {
     name: file.name,
-    url: data.url,
+    url: fullPath,
     mime: file.type,
     size: file.size,
   };
