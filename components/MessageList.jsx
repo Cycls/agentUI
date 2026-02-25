@@ -15,6 +15,7 @@ export const MessageList = React.memo(
     isGenerating,
     onRetry,
     retryingIndex,
+    getToken,
   }) => {
     const renderedMessages = useMemo(
       () =>
@@ -42,7 +43,7 @@ export const MessageList = React.memo(
                   {/* Attachments rendered ABOVE the message bubble */}
                   {attachments.length > 0 && (
                     <div className="mb-1">
-                      <AttachmentPreview attachments={attachments} />
+                      <AttachmentPreview attachments={attachments} getToken={getToken} />
                     </div>
                   )}
 
@@ -109,6 +110,7 @@ export const MessageList = React.memo(
                             part={part}
                             onSend={onSend}
                             isGenerating={isCurrentlyGenerating}
+                            getToken={getToken}
                           />
                         ))}
 
@@ -143,7 +145,7 @@ export const MessageList = React.memo(
             </div>
           );
         }),
-      [messages, onSend, onRegenerate, isGenerating, onRetry, retryingIndex]
+      [messages, onSend, onRegenerate, isGenerating, onRetry, retryingIndex, getToken]
     );
 
     return <div className="space-y-1">{renderedMessages}</div>;
