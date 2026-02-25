@@ -6,7 +6,7 @@ export async function authFetch(url, options = {}, getToken) {
   const headers = { ...options.headers };
   if (getToken) {
     try {
-      const token = await getToken({ template: "template" });
+      const token = await getToken();
       if (token) headers["Authorization"] = "Bearer " + token;
     } catch (_) {
       // Auth not available — proceed without token

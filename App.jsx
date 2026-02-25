@@ -198,12 +198,6 @@ const AppContent = ({
     return subscription?.subscriptionItems?.[0]?.plan?.name || null;
   }, [subscription]);
 
-  const planInfo = useMemo(() => {
-    const plan = subscription?.subscriptionItems?.[0]?.plan;
-    if (!plan) return null;
-    return { plan_name: plan.name, plan_id: plan.id, plan_slug: plan.slug };
-  }, [subscription]);
-
   // PostHog identify hook - safely receives user data as props
   usePostHogIdentify(
     AUTH && isOnPaidPlan,
@@ -362,7 +356,6 @@ const AppContent = ({
     onFirstSend: () => setHasBegun(true),
     auth: AUTH,
     getToken: authApi?.getToken,
-    plan: planInfo,
     activeChatId,
     setActiveChatId,
     setChatHistory,
@@ -479,7 +472,6 @@ const AppContent = ({
           messages: contextMessages,
           auth: AUTH,
           getToken: authApi?.getToken,
-          plan: planInfo,
           onPart: (item) => {
             resetTimeout();
 
@@ -617,7 +609,6 @@ const AppContent = ({
       messages,
       AUTH,
       authApi?.getToken,
-      planInfo,
       activeChatId,
       analyticsEnabled,
       saveAndRefresh,
@@ -675,7 +666,6 @@ const AppContent = ({
           messages: contextMessages,
           auth: AUTH,
           getToken: authApi?.getToken,
-          plan: planInfo,
           onPart: (item) => {
             resetTimeout();
 
@@ -816,7 +806,6 @@ const AppContent = ({
       messages,
       AUTH,
       authApi?.getToken,
-      planInfo,
       activeChatId,
       analyticsEnabled,
       saveAndRefresh,
