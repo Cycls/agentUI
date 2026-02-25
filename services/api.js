@@ -198,7 +198,7 @@ export async function sendCyclsChatMessage({
     }
   }
 
-  const response = await fetch("/chat/cycls", {
+  const response = await fetch("/", {
     method: "POST",
     headers,
     body: JSON.stringify({ messages: context }),
