@@ -1,6 +1,7 @@
 import React from "react";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 import { useCanvas } from "../contexts/CanvasContext";
+import { useAuthSrc } from "../hooks/useAuthSrc";
 
 const cx = (...cls) => cls.filter(Boolean).join(" ");
 
@@ -174,11 +175,13 @@ function CanvasBlock({ title, content, isComplete }) {
   );
 }
 
-// Image block with download functionality
-function ImageBlock({ src, alt }) {
+// Image block with download functionality and auth-aware loading
+function ImageBlock({ src: rawSrc, alt, getToken }) {
   const [isHovered, setIsHovered] = React.useState(false);
+  const { src, loading } = useAuthSrc(rawSrc, getToken);
 
   const handleDownload = React.useCallback(async () => {
+    if (!src) return;
     try {
       const response = await fetch(src);
       const blob = await response.blob();
@@ -194,6 +197,15 @@ function ImageBlock({ src, alt }) {
       console.error("Failed to download image:", error);
     }
   }, [src, alt]);
+
+  if (loading || !src) {
+    return (
+      <div
+        className="relative md:w-[60%] inline-block rounded-lg animate-pulse"
+        style={{ backgroundColor: "var(--bg-tertiary)", height: "200px" }}
+      />
+    );
+  }
 
   return (
     <div
@@ -246,7 +258,7 @@ function formatThinkingTime(seconds) {
   return `${mins}m ${secs}s`;
 }
 
-// Thinking block - Claude style with border, no background
+// Thinking block
 function ThinkingBlock({ thinking, onSend, isActive, startTime, duration }) {
   const [open, setOpen] = React.useState(false);
   const [elapsed, setElapsed] = React.useState(() => {
@@ -330,7 +342,7 @@ function ThinkingBlock({ thinking, onSend, isActive, startTime, duration }) {
   );
 }
 
-// Steps block - Claude style with border and timeline
+// Steps block
 function StepsBlock({ steps, onSend, isGenerating }) {
   const [expanded, setExpanded] = React.useState(false);
   const [expandedSteps, setExpandedSteps] = React.useState({});
@@ -347,7 +359,6 @@ function StepsBlock({ steps, onSend, isGenerating }) {
     setExpandedSteps((prev) => ({ ...prev, [index]: !prev[index] }));
   };
 
-  // Determine if a step is a search step
   const isSearchStep = (step) => {
     return (
       step.result ||
@@ -358,6 +369,15 @@ function StepsBlock({ steps, onSend, isGenerating }) {
     );
   };
 
+  // Determine dot/icon color based on step status
+  const getDotColor = (step, isLastStep) => {
+    if (step.error || step.status === "error")
+      return "var(--text-error, #ef4444)";
+    if (step.status === "warning") return "var(--text-warning, #f59e0b)";
+    if (isGenerating && isLastStep) return "var(--text-success, #309454)";
+    return "var(--text-success, #309454)";
+  };
+
   return (
     <div
       className="my-3 rounded-lg border"
@@ -365,7 +385,7 @@ function StepsBlock({ steps, onSend, isGenerating }) {
         borderColor: "var(--border-primary)",
       }}
     >
-      {/* Header */}
+      {/* Header - always visible, always collapsible */}
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
@@ -383,125 +403,160 @@ function StepsBlock({ steps, onSend, isGenerating }) {
         </span>
       </button>
 
-      {/* Steps list - always visible */}
-      <div className="px-4 pb-4">
-        {/* "+N more steps" row when collapsed */}
-        {hiddenCount > 0 && (
-          <button
-            type="button"
-            onClick={() => setExpanded(true)}
-            className="w-full text-left py-2 pl-5 text-sm transition-opacity hover:opacity-70"
-            style={{ color: "var(--text-tertiary)" }}
-          >
-            +{hiddenCount} more step{hiddenCount !== 1 ? "s" : ""}
-          </button>
-        )}
+      {/* Steps list - only visible when expanded */}
+      {expanded && (
+        <div className="px-4 pb-4">
+          {/* "+N more steps" row when collapsed */}
+          {hiddenCount > 0 && (
+            <button
+              type="button"
+              onClick={() => setExpanded(true)}
+              className="w-full text-left py-2 pl-5 text-sm transition-opacity hover:opacity-70"
+              style={{ color: "var(--text-tertiary)" }}
+            >
+              +{hiddenCount} more step{hiddenCount !== 1 ? "s" : ""}
+            </button>
+          )}
 
-        {/* Visible steps */}
-        <div className="relative">
-          {visibleSteps.map((step, index) => {
-            const actualIndex = expanded
-              ? index
-              : steps.length - DEFAULT_VISIBLE + index;
-            const hasData = step.data != null;
-            const isStepExpanded = expandedSteps[actualIndex];
-            const isLastStep = index === visibleSteps.length - 1;
-            const isSearch = isSearchStep(step);
+          {/* Visible steps */}
+          <div className="relative">
+            {visibleSteps.map((step, index) => {
+              const actualIndex = expanded
+                ? index
+                : steps.length - DEFAULT_VISIBLE + index;
+              const hasData = step.data != null;
+              const isStepExpanded = expandedSteps[actualIndex];
+              const isLastStep = index === visibleSteps.length - 1;
+              const isSearch = isSearchStep(step);
+              const dotColor = getDotColor(step, isLastStep);
+              const isActive = isGenerating && isLastStep;
 
-            return (
-              <div key={actualIndex} className="relative">
-                {/* Vertical connector line */}
-                {!isLastStep && (
-                  <div
-                    className="absolute left-[7px] top-5 w-px -mt-0.5"
-                    style={{
-                      backgroundColor: "var(--border-primary)",
-                      height: "calc(100% + 1px)",
-                    }}
-                  />
-                )}
-
-                <div className="flex items-start gap-3 py-1.5">
-                  {/* Icon - globe for search, dot for others, with activity indicator for active step */}
-                  <div className="flex-shrink-0 mt-0.5 flex items-center justify-center w-4 h-4 relative">
-                    {isSearch ? <GlobeIcon /> : <StepDot />}
-                    {isGenerating && isLastStep && <ActivityIndicator />}
-                  </div>
-
-                  {/* Step content */}
-                  <div className="flex-1 min-w-0 flex items-start justify-between gap-2">
-                    <button
-                      type="button"
-                      onClick={
-                        hasData ? () => toggleStepData(actualIndex) : undefined
-                      }
-                      disabled={!hasData}
-                      className={cx(
-                        "flex-1 min-w-0 text-left text-sm leading-relaxed",
-                        hasData && "cursor-pointer hover:opacity-80",
-                        isGenerating && isLastStep && "step-text-shimmer"
-                      )}
-                      style={{
-                        color: isGenerating && isLastStep ? undefined : "var(--text-secondary)",
-                        wordBreak: "break-all",
-                      }}
-                    >
-                      {step.step}
-                    </button>
-
-                    {/* Right side: result count and/or chevron */}
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      {step.result && (
-                        <span
-                          className="text-sm"
-                          style={{ color: "var(--text-tertiary)" }}
-                        >
-                          {step.result}
-                        </span>
-                      )}
-                      {hasData && (
-                        <button
-                          type="button"
-                          onClick={() => toggleStepData(actualIndex)}
-                          className="p-1 -m-1 hover:opacity-70"
-                          style={{ color: "var(--text-tertiary)" }}
-                        >
-                          <ChevronIcon isOpen={isStepExpanded} />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Expanded step data */}
-                {hasData && isStepExpanded && (
-                  <div className="ml-7 mt-1 mb-2">
+              return (
+                <div key={actualIndex} className="relative">
+                  {/* Vertical connector line */}
+                  {!isLastStep && (
                     <div
-                      className="rounded-lg border px-2 prose prose-sm max-w-none"
+                      className="absolute left-[7px] top-5 w-px -mt-0.5"
                       style={{
-                        borderColor: "var(--border-primary)",
-                        color: "var(--text-tertiary)",
-                        wordBreak: "break-all",
+                        backgroundColor: "var(--border-primary)",
+                        height: "calc(100% + 1px)",
                       }}
-                    >
-                      <MarkdownRenderer
-                        markdown={
-                          typeof step.data === "string"
-                            ? step.data
-                            : "```json\n" +
-                              JSON.stringify(step.data, null, 2) +
-                              "\n```"
+                    />
+                  )}
+
+                  <div className="flex items-start gap-3 py-1.5">
+                    {/* Dot/Globe indicator - color conveys status, shape conveys type */}
+                    <div className="flex-shrink-0 mt-1 flex items-center justify-center w-4 h-4">
+                      {isSearch ? (
+                        <div
+                          style={{
+                            color: dotColor,
+                            transition: "color 0.3s ease",
+                            ...(isActive
+                              ? {
+                                  animation:
+                                    "step-dot-pulse 2s ease-in-out infinite",
+                                }
+                              : {}),
+                          }}
+                        >
+                          <GlobeIcon />
+                        </div>
+                      ) : (
+                        <div
+                          style={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: "50%",
+                            backgroundColor: dotColor,
+                            transition: "background-color 0.3s ease",
+                            ...(isActive
+                              ? {
+                                  animation:
+                                    "step-dot-pulse 2s ease-in-out infinite",
+                                }
+                              : {}),
+                          }}
+                        />
+                      )}
+                    </div>
+
+                    {/* Step content */}
+                    <div className="flex-1 min-w-0 flex items-start justify-between gap-2">
+                      <button
+                        type="button"
+                        onClick={
+                          hasData
+                            ? () => toggleStepData(actualIndex)
+                            : undefined
                         }
-                        onSend={onSend}
-                      />
+                        disabled={!hasData}
+                        className={cx(
+                          "flex-1 min-w-0 text-left text-sm leading-relaxed",
+                          hasData && "cursor-pointer hover:opacity-80"
+                        )}
+                        style={{
+                          color: "var(--text-secondary)",
+                          wordBreak: "break-all",
+                        }}
+                      >
+                        {step.step}
+                      </button>
+
+                      {/* Right side: result count and/or chevron */}
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {step.result && (
+                          <span
+                            className="text-sm"
+                            style={{ color: "var(--text-tertiary)" }}
+                          >
+                            {step.result}
+                          </span>
+                        )}
+                        {hasData && (
+                          <button
+                            type="button"
+                            onClick={() => toggleStepData(actualIndex)}
+                            className="p-1 -m-1 hover:opacity-70"
+                            style={{ color: "var(--text-tertiary)" }}
+                          >
+                            <ChevronIcon isOpen={isStepExpanded} />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
-                )}
-              </div>
-            );
-          })}
+
+                  {/* Expanded step data */}
+                  {hasData && isStepExpanded && (
+                    <div className="ml-7 mt-1 mb-2">
+                      <div
+                        className="rounded-lg border px-2 prose prose-sm max-w-none"
+                        style={{
+                          borderColor: "var(--border-primary)",
+                          color: "var(--text-tertiary)",
+                          wordBreak: "break-all",
+                        }}
+                      >
+                        <MarkdownRenderer
+                          markdown={
+                            typeof step.data === "string"
+                              ? step.data
+                              : "```json\n" +
+                                JSON.stringify(step.data, null, 2) +
+                                "\n```"
+                          }
+                          onSend={onSend}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -511,6 +566,7 @@ export const PartRenderer = React.memo(function PartRenderer({
   part,
   onSend,
   isGenerating,
+  getToken,
 }) {
   if (!part || !part.type) return null;
 
@@ -540,12 +596,18 @@ export const PartRenderer = React.memo(function PartRenderer({
 
   // Handle steps type (aggregated steps array)
   if (part.type === "steps") {
-    return <StepsBlock steps={part.steps || []} onSend={onSend} isGenerating={isGenerating} />;
+    return (
+      <StepsBlock
+        steps={part.steps || []}
+        onSend={onSend}
+        isGenerating={isGenerating}
+      />
+    );
   }
 
   // Handle image type with native download UI (format: {type: "image", image: "url"})
   if (part.type === "image" && part.image) {
-    return <ImageBlock src={part.image} alt={part.alt} />;
+    return <ImageBlock src={part.image} alt={part.alt} getToken={getToken} />;
   }
 
   // For all other types, convert to markdown and use MarkdownRenderer

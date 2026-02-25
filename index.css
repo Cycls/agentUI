@@ -404,7 +404,6 @@ body {
   transform: translateX(0);
 }
 
-
 /* Streaming cursor animation */
 @keyframes blink {
   0%,
@@ -520,64 +519,12 @@ body {
 }
 
 /* Shimmer effect for active step text */
-.step-text-shimmer {
-  background: linear-gradient(
-    90deg,
-    var(--text-secondary) 0%,
-    var(--text-primary) 50%,
-    var(--text-secondary) 100%
-  );
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: stepShimmer 1.5s ease-in-out infinite;
-}
-
-@keyframes stepShimmer {
-  0%,
-  100% {
-    background-position: 200% 0;
-  }
-  50% {
-    background-position: 0% 0;
-  }
-}
-
-/* Reduced motion - show static indicator instead */
-@media (prefers-reduced-motion: reduce) {
-  .step-pulse-ring {
-    animation: none;
-    opacity: 0.4;
-    transform: scale(1.2);
-  }
-
-  .step-pulse-ring-delayed {
-    display: none;
-  }
-
-  .step-orbit {
-    animation: none;
-  }
-
-  .step-orbit-dot {
-    top: 50%;
-    margin-top: -1.5px;
-    animation: stepBlink 1s step-end infinite;
-  }
-
-  .step-text-shimmer {
-    animation: none;
-    -webkit-text-fill-color: var(--text-primary);
-  }
-}
-
-@keyframes stepBlink {
+@keyframes step-dot-pulse {
   0%,
   100% {
     opacity: 1;
   }
   50% {
-    opacity: 0.3;
+    opacity: 0.4;
   }
 }
