@@ -4,13 +4,9 @@ import { useNavigate, Link } from "react-router";
 import { AuthLayout } from "./AuthLayout";
 import { AuthToast } from "./AuthToast";
 import { mapClerkError } from "./authErrors";
+import { Loader2, User, ChevronLeft } from "lucide-react";
 
-const Spinner = () => (
-  <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
-    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-  </svg>
-);
+const Spinner = () => <Loader2 className="animate-spin w-5 h-5" />;
 
 export const CompleteSignUpPage = ({ afterUrl = "/" }) => {
   const { isLoaded, signUp, setActive } = useSignUp();
@@ -111,10 +107,7 @@ export const CompleteSignUpPage = ({ afterUrl = "/" }) => {
           className="w-16 h-16 rounded-2xl flex items-center justify-center"
           style={{ backgroundColor: "var(--bg-tertiary)" }}
         >
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
-          </svg>
+          <User size={32} strokeWidth={1.5} stroke="var(--accent-primary)" />
         </div>
       </div>
 
@@ -197,9 +190,7 @@ export const CompleteSignUpPage = ({ afterUrl = "/" }) => {
           className="inline-flex items-center gap-1.5 text-sm transition-colors hover:underline"
           style={{ color: "var(--text-tertiary)" }}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m15 18-6-6 6-6" />
-          </svg>
+          <ChevronLeft size={14} />
           Back to sign in
         </Link>
       </div>

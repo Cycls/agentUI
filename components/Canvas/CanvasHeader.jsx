@@ -1,49 +1,7 @@
 import React from "react";
+import { FileText, X } from "lucide-react";
 import { useCanvas } from "../../contexts/CanvasContext";
 import { CanvasExportMenu } from "./CanvasExportMenu";
-
-// ───────────────────────────────────────────────────────────────────────────────
-// Canvas Header - Title bar with actions
-// ───────────────────────────────────────────────────────────────────────────────
-
-// Document icon
-const DocumentIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-    <polyline points="14 2 14 8 20 8" />
-    <line x1="16" y1="13" x2="8" y2="13" />
-    <line x1="16" y1="17" x2="8" y2="17" />
-    <line x1="10" y1="9" x2="8" y2="9" />
-  </svg>
-);
-
-// Close icon
-const CloseIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <line x1="18" y1="6" x2="6" y2="18" />
-    <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
-);
 
 // Streaming indicator - simplified version for header
 const StreamingDots = () => (
@@ -74,7 +32,7 @@ export const CanvasHeader = ({ closeButtonRef }) => {
           className="flex-shrink-0"
           style={{ color: "var(--text-secondary)" }}
         >
-          <DocumentIcon />
+          <FileText size={18} strokeWidth={1.7} />
         </div>
 
         <h2
@@ -106,7 +64,7 @@ export const CanvasHeader = ({ closeButtonRef }) => {
           style={{ color: "var(--text-secondary)" }}
           aria-label="Close canvas"
         >
-          <CloseIcon />
+          <X size={18} strokeWidth={1.7} />
         </button>
       </div>
     </div>

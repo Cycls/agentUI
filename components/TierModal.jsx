@@ -1,4 +1,5 @@
 import { PricingTable } from "@clerk/clerk-react";
+import { Zap } from "lucide-react";
 
 export const TierModal = ({ open, onClose, tier }) => {
   if (!open) return null;
@@ -43,17 +44,7 @@ export const TierModal = ({ open, onClose, tier }) => {
           {/* Header section */}
           <div className="space-y-3 pr-8 mb-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20">
-              <svg
-                className="w-3.5 h-3.5"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <Zap className="w-3.5 h-3.5" fill="currentColor" stroke="none" />
               <span className="text-xs font-semibold uppercase tracking-wide">
                 Upgrade Available
               </span>

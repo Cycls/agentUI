@@ -5,6 +5,7 @@ import {
   useEffect,
   useCallback,
 } from "react";
+import { Sun, Moon } from "lucide-react";
 
 // Theme Context - Manages dark/light mode with system preference support
 const ThemeContext = createContext({
@@ -149,39 +150,9 @@ export const ThemeToggle = ({ className = "" }) => {
       title={isDark ? "Light mode" : "Dark mode"}
     >
       {isDark ? (
-        // Sun icon for dark mode (click to go light)
-        <svg
-          className="theme-toggle-icon w-5 h-5"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.7"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <circle cx="12" cy="12" r="4" />
-          <path d="M12 2v2" />
-          <path d="M12 20v2" />
-          <path d="M4.93 4.93l1.41 1.41" />
-          <path d="M17.66 17.66l1.41 1.41" />
-          <path d="M2 12h2" />
-          <path d="M20 12h2" />
-          <path d="M6.34 17.66l-1.41 1.41" />
-          <path d="M19.07 4.93l-1.41 1.41" />
-        </svg>
+        <Sun className="theme-toggle-icon w-5 h-5" strokeWidth={1.7} />
       ) : (
-        // Moon icon for light mode (click to go dark)
-        <svg
-          className="theme-toggle-icon w-5 h-5"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.7"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-        </svg>
+        <Moon className="theme-toggle-icon w-5 h-5" strokeWidth={1.7} />
       )}
     </button>
   );

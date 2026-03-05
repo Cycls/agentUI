@@ -1,26 +1,10 @@
 import { useEffect } from "react";
+import { AlertCircle, CheckCircle2, Info, X } from "lucide-react";
 
 const ICONS = {
-  error: (
-    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" />
-      <line x1="12" y1="8" x2="12" y2="12" />
-      <line x1="12" y1="16" x2="12.01" y2="16" />
-    </svg>
-  ),
-  success: (
-    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" />
-      <path d="M9 12l2 2 4-4" />
-    </svg>
-  ),
-  info: (
-    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" />
-      <line x1="12" y1="16" x2="12" y2="12" />
-      <line x1="12" y1="8" x2="12.01" y2="8" />
-    </svg>
-  ),
+  error: <AlertCircle className="w-5 h-5" />,
+  success: <CheckCircle2 className="w-5 h-5" />,
+  info: <Info className="w-5 h-5" />,
 };
 
 const COLORS = {
@@ -63,13 +47,7 @@ export const AuthToast = ({ message, type = "error", onDismiss }) => {
           style={{ color: "var(--text-muted)" }}
           aria-label="Dismiss"
         >
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-            <path
-              fillRule="evenodd"
-              d="M4.28 3.22a.75.75 0 00-1.06 1.06L6.94 8l-3.72 3.72a.75.75 0 101.06 1.06L8 9.06l3.72 3.72a.75.75 0 101.06-1.06L9.06 8l3.72-3.72a.75.75 0 00-1.06-1.06L8 6.94 4.28 3.22z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <X size={14} />
         </button>
       </div>
     </div>

@@ -3,6 +3,7 @@ import { FileErrorToast } from "./Toast";
 import { formatFileSize, validateFile, uploadOne } from "../utils/file";
 import { CONFIG } from "../clientConfig";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { CloudUpload, Paperclip, Square, Zap } from "lucide-react";
 
 export const Composer = ({
   onSend,
@@ -235,20 +236,7 @@ export const Composer = ({
                 className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4"
                 style={{ backgroundColor: "var(--bg-tertiary)" }}
               >
-                <svg
-                  className="w-8 h-8"
-                  style={{ color: "var(--text-primary)" }}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                  />
-                </svg>
+                <CloudUpload className="w-8 h-8" style={{ color: "var(--text-primary)" }} strokeWidth={2} />
               </div>
               <h3
                 className="text-lg font-semibold mb-2"
@@ -349,19 +337,7 @@ export const Composer = ({
                   aria-label="Attach file"
                   title={disabled ? "Upgrade to attach files" : "Attach files"}
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551" />
-                  </svg>
+                  <Paperclip size={20} strokeWidth={1.5} />
                 </button>
                 <input
                   ref={inputRef}
@@ -389,14 +365,7 @@ export const Composer = ({
                     aria-label="Stop generating"
                     title="Stop"
                   >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                    >
-                      <rect x="6" y="6" width="12" height="12" rx="2"></rect>
-                    </svg>
+                    <Square size={18} fill="currentColor" stroke="none" />
                   </button>
                 )}
 
@@ -408,17 +377,7 @@ export const Composer = ({
                     aria-label="Upgrade to continue"
                     title="Upgrade"
                   >
-                    <svg
-                      className="w-4 h-4"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    <Zap className="w-4 h-4" fill="currentColor" stroke="none" />
                     Upgrade
                   </button>
                 )}

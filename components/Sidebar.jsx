@@ -8,6 +8,15 @@ import {
 } from "react";
 import { CONFIG } from "../clientConfig";
 import { getPinnedChats, pinChat, unpinChat } from "../services/storage";
+import {
+  PanelLeft,
+  ChevronRight,
+  Trash2,
+  Folder,
+  MoreHorizontal,
+  Pin,
+  PinOff,
+} from "lucide-react";
 
 // ── Constants ──
 export const SIDEBAR_WIDTH = {
@@ -17,7 +26,7 @@ export const SIDEBAR_WIDTH = {
 
 const cx = (...classes) => classes.filter(Boolean).join(" ");
 
-// ── Icons (thinner stroke, consistent sizing) ──
+// ── Icons ──
 const IconWrap = ({ children }) => (
   <span className="grid place-items-center w-5 h-5">{children}</span>
 );
@@ -40,124 +49,31 @@ const NewChatIcon = (props) => (
 );
 
 const PanelIcon = (props) => (
-  <svg
-    aria-hidden="true"
-    viewBox="0 0 24 24"
-    className={cx("w-[18px] h-[18px]", props?.className)}
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <rect x="3" y="3" width="18" height="18" rx="2" />
-    <path d="M9 3v18" />
-  </svg>
+  <PanelLeft aria-hidden="true" className={cx("w-[18px] h-[18px]", props?.className)} strokeWidth={1.7} />
 );
 
 const ChevronRightIcon = (props) => (
-  <svg
-    aria-hidden="true"
-    viewBox="0 0 24 24"
-    className={cx("w-5 h-5", props?.className)}
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M10 7l5 5-5 5" />
-  </svg>
+  <ChevronRight aria-hidden="true" className={cx("w-5 h-5", props?.className)} strokeWidth={1.5} />
 );
 
 const TrashIcon = (props) => (
-  <svg
-    aria-hidden="true"
-    viewBox="0 0 24 24"
-    className={cx("w-4 h-4", props?.className)}
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M3 6h18" />
-    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-    <path d="M10 11v6" />
-    <path d="M14 11v6" />
-  </svg>
+  <Trash2 aria-hidden="true" className={cx("w-4 h-4", props?.className)} strokeWidth={1.5} />
 );
 
 const FolderIcon = (props) => (
-  <svg
-    aria-hidden="true"
-    viewBox="0 0 24 24"
-    className={cx("w-[18px] h-[18px]", props?.className)}
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />
-  </svg>
+  <Folder aria-hidden="true" className={cx("w-[18px] h-[18px]", props?.className)} strokeWidth={1.7} />
 );
 
 const DotsIcon = (props) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={cx(
-      "lucide lucide-ellipsis-icon lucide-ellipsis",
-      props?.className
-    )}
-  >
-    <circle cx="12" cy="12" r="1" />
-    <circle cx="19" cy="12" r="1" />
-    <circle cx="5" cy="12" r="1" />
-  </svg>
+  <MoreHorizontal size={20} strokeWidth={1.5} className={props?.className} />
 );
 
 const PinIcon = (props) => (
-  <svg
-    aria-hidden="true"
-    viewBox="0 0 24 24"
-    className={cx("w-4 h-4", props?.className)}
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M12 17v5" />
-    <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" />
-  </svg>
+  <Pin aria-hidden="true" className={cx("w-4 h-4", props?.className)} strokeWidth={1.5} />
 );
 
 const PinOffIcon = (props) => (
-  <svg
-    aria-hidden="true"
-    viewBox="0 0 24 24"
-    className={cx("w-4 h-4", props?.className)}
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M12 17v5" />
-    <path d="M15 9.34V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H7.89" />
-    <path d="m2 2 20 20" />
-    <path d="M9 9v1.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h11" />
-  </svg>
+  <PinOff aria-hidden="true" className={cx("w-4 h-4", props?.className)} strokeWidth={1.5} />
 );
 
 // ── Hooks ──

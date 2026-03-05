@@ -1,5 +1,16 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
+  Folder as FolderLucide,
+  ChevronRight as ChevronRightLucide,
+  Home,
+  Upload,
+  FolderPlus,
+  ChevronLeft,
+  Download,
+  Pencil,
+  Trash2,
+} from "lucide-react";
+import {
   listFiles,
   fetchBlob,
   fetchFolderZip,
@@ -13,21 +24,7 @@ const cx = (...classes) => classes.filter(Boolean).join(" ");
 
 // ── Icons ──
 const FolderIcon = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path
-      d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"
-      fill="var(--finder-folder-fill)"
-      stroke="var(--finder-folder-stroke)"
-      strokeWidth="1.5"
-    />
-  </svg>
+  <FolderLucide size={20} fill="var(--finder-folder-fill)" color="var(--finder-folder-stroke)" strokeWidth={1.5} />
 );
 
 const FileIcon = ({ name = "" }) => {
@@ -107,34 +104,7 @@ const FileIcon = ({ name = "" }) => {
 };
 
 const ChevronRight = () => (
-  <svg
-    width="7"
-    height="12"
-    viewBox="0 0 7 12"
-    fill="none"
-    stroke="var(--text-muted)"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M1 1l5 5-5 5" />
-  </svg>
-);
-
-const ActionIcon = ({ children, ...props }) => (
-  <svg
-    width="15"
-    height="15"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.6"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    {children}
-  </svg>
+  <ChevronRightLucide size={12} stroke="var(--text-muted)" strokeWidth={1.5} />
 );
 
 function formatSize(bytes) {
@@ -761,11 +731,7 @@ export const FileModal = ({ open, onClose, getToken }) => {
               className="toolbar-btn"
               disabled={uploading}
             >
-              <ActionIcon>
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="17 8 12 3 7 8" />
-                <line x1="12" y1="3" x2="12" y2="15" />
-              </ActionIcon>
+              <Upload size={15} strokeWidth={1.6} />
               {uploading ? "Uploading…" : "Upload"}
             </button>
             <button
@@ -773,11 +739,7 @@ export const FileModal = ({ open, onClose, getToken }) => {
               className="toolbar-btn"
               disabled={creatingFolder}
             >
-              <ActionIcon>
-                <path d="M12 10v6" />
-                <path d="M9 13h6" />
-                <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />
-              </ActionIcon>
+              <FolderPlus size={15} strokeWidth={1.6} />
               New Folder
             </button>
             <div className="toolbar-separator" />
@@ -786,9 +748,7 @@ export const FileModal = ({ open, onClose, getToken }) => {
                 onClick={() => setPath(segments.slice(0, -1).join("/"))}
                 className="toolbar-btn"
               >
-                <ActionIcon>
-                  <polyline points="15 18 9 12 15 6" />
-                </ActionIcon>
+                <ChevronLeft size={15} strokeWidth={1.6} />
                 Back
               </button>
             )}
@@ -800,18 +760,7 @@ export const FileModal = ({ open, onClose, getToken }) => {
               onClick={() => setPath("")}
               className={cx("crumb-btn", !path && "active")}
             >
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0h4" />
-              </svg>
+              <Home size={13} strokeWidth={1.8} />
               Home
             </button>
             {segments.map((seg, i) => {
@@ -895,18 +844,7 @@ export const FileModal = ({ open, onClose, getToken }) => {
             ) : sorted.length === 0 && !creatingFolder ? (
               <div className="finder-empty">
                 <span className="finder-empty-icon">
-                  <svg
-                    width="44"
-                    height="44"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="0.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />
-                  </svg>
+                  <FolderLucide size={44} strokeWidth={0.8} />
                 </span>
                 <span className="finder-empty-title">This folder is empty</span>
                 <span className="finder-empty-hint">
@@ -999,32 +937,21 @@ export const FileModal = ({ open, onClose, getToken }) => {
                         className="action-btn"
                         title={item.type === "directory" ? "Download as ZIP" : "Download"}
                       >
-                        <ActionIcon>
-                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                          <polyline points="7 10 12 15 17 10" />
-                          <line x1="12" y1="15" x2="12" y2="3" />
-                        </ActionIcon>
+                        <Download size={15} strokeWidth={1.6} />
                       </button>
                       <button
                         onClick={(e) => startRename(item, e)}
                         className="action-btn"
                         title="Rename"
                       >
-                        <ActionIcon>
-                          <path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                          <path d="m15 5 4 4" />
-                        </ActionIcon>
+                        <Pencil size={15} strokeWidth={1.6} />
                       </button>
                       <button
                         onClick={(e) => handleDelete(item.name, e)}
                         className="action-btn danger"
                         title="Delete"
                       >
-                        <ActionIcon>
-                          <path d="M3 6h18" />
-                          <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-                        </ActionIcon>
+                        <Trash2 size={15} strokeWidth={1.6} />
                       </button>
                     </span>
                   </div>

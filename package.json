@@ -34,6 +34,7 @@
     "docx": "^9.5.1",
     "file-saver": "^2.0.5",
     "jspdf": "^4.0.0",
+    "lucide-react": "^0.577.0",
     "posthog-js": "^1.306.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

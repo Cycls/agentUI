@@ -1,54 +1,10 @@
 import React from "react";
+import { ChevronDown, Globe, FileText, ExternalLink, Download } from "lucide-react";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 import { useCanvas } from "../contexts/CanvasContext";
 import { useAuthSrc } from "../hooks/useAuthSrc";
 
 const cx = (...cls) => cls.filter(Boolean).join(" ");
-
-// Simple chevron icon
-function ChevronIcon({ isOpen }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={cx(
-        "transition-transform duration-200",
-        isOpen ? "rotate-180" : "rotate-0"
-      )}
-    >
-      <path d="M6 9l6 6 6-6" />
-    </svg>
-  );
-}
-
-// Globe icon for search steps
-function GlobeIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={{ color: "var(--text-tertiary)" }}
-    >
-      <circle cx="12" cy="12" r="10" />
-      <path d="M2 12h20" />
-      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-    </svg>
-  );
-}
 
 // Simple dot for non-search steps
 function StepDot() {
@@ -78,49 +34,6 @@ function ActivityIndicator() {
   );
 }
 
-// Document icon for canvas
-function DocumentIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-      <polyline points="14 2 14 8 20 8" />
-      <line x1="16" y1="13" x2="8" y2="13" />
-      <line x1="16" y1="17" x2="8" y2="17" />
-      <line x1="10" y1="9" x2="8" y2="9" />
-    </svg>
-  );
-}
-
-// External link icon
-function ExternalLinkIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-      <polyline points="15 3 21 3 21 9" />
-      <line x1="10" y1="14" x2="21" y2="3" />
-    </svg>
-  );
-}
 
 // Canvas block - allows reopening the document canvas
 function CanvasBlock({ title, content, isComplete }) {
@@ -149,7 +62,7 @@ function CanvasBlock({ title, content, isComplete }) {
             className="flex-shrink-0"
             style={{ color: "var(--text-secondary)" }}
           >
-            <DocumentIcon />
+            <FileText size={18} strokeWidth={1.7} />
           </div>
           <div className="min-w-0">
             <span
@@ -168,7 +81,7 @@ function CanvasBlock({ title, content, isComplete }) {
           style={{ color: "var(--text-tertiary)" }}
         >
           <span className="text-xs">Open</span>
-          <ExternalLinkIcon />
+          <ExternalLink size={14} />
         </div>
       </button>
     </div>
@@ -227,21 +140,7 @@ function ImageBlock({ src: rawSrc, alt, getToken }) {
           title="Download image"
           aria-label="Download image"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="7 10 12 15 17 10" />
-            <line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
+          <Download size={18} />
         </button>
       )}
     </div>
@@ -320,7 +219,7 @@ function ThinkingBlock({ thinking, onSend, isActive, startTime, duration }) {
             </span>
           )}
           <span style={{ color: "var(--text-tertiary)" }}>
-            <ChevronIcon isOpen={open} />
+            <ChevronDown size={16} className={cx("transition-transform duration-200", open ? "rotate-180" : "rotate-0")} />
           </span>
         </div>
       </button>
@@ -396,7 +295,7 @@ function StepsBlock({ steps, onSend, isGenerating }) {
           className="flex-shrink-0"
           style={{ color: "var(--text-tertiary)" }}
         >
-          <ChevronIcon isOpen={expanded} />
+          <ChevronDown size={16} className={cx("transition-transform duration-200", expanded ? "rotate-180" : "rotate-0")} />
         </span>
         <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
           {steps.length} step{steps.length !== 1 ? "s" : ""}
@@ -460,7 +359,7 @@ function StepsBlock({ steps, onSend, isGenerating }) {
                               : {}),
                           }}
                         >
-                          <GlobeIcon />
+                          <Globe size={16} strokeWidth={1.5} style={{ color: "var(--text-tertiary)" }} />
                         </div>
                       ) : (
                         <div
@@ -520,7 +419,7 @@ function StepsBlock({ steps, onSend, isGenerating }) {
                             className="p-1 -m-1 hover:opacity-70"
                             style={{ color: "var(--text-tertiary)" }}
                           >
-                            <ChevronIcon isOpen={isStepExpanded} />
+                            <ChevronDown size={16} className={cx("transition-transform duration-200", isStepExpanded ? "rotate-180" : "rotate-0")} />
                           </button>
                         )}
                       </div>
