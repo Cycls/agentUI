@@ -1,7 +1,7 @@
 import { PricingTable } from "@clerk/clerk-react";
 import { Zap } from "lucide-react";
 
-export const TierModal = ({ open, onClose, tier }) => {
+export const TierModal = ({ open, onClose, tier, onNavigateToPlans }) => {
   if (!open) return null;
   return (
     <div
@@ -91,7 +91,7 @@ export const TierModal = ({ open, onClose, tier }) => {
           </div>
 
           {/* Footer actions */}
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
@@ -100,6 +100,23 @@ export const TierModal = ({ open, onClose, tier }) => {
             >
               Maybe later
             </button>
+            {onNavigateToPlans && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onNavigateToPlans();
+                }}
+                className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium transition-all duration-200 theme-transition"
+                style={{
+                  backgroundColor: "var(--btn-primary-bg)",
+                  color: "var(--btn-primary-text)",
+                }}
+              >
+                <Zap className="w-3.5 h-3.5" fill="currentColor" stroke="none" />
+                View Plans
+              </button>
+            )}
           </div>
         </div>
       </div>

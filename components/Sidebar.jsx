@@ -419,6 +419,7 @@ export const ChatHistorySidebar = ({
   UserButtonComponent,
   OrgSwitcherComponent,
   isAuthenticated,
+  onSettingsNavigate,
 }) => {
   const [pinnedIds, setPinnedIds] = useState(() => getPinnedChats());
 
@@ -482,14 +483,9 @@ export const ChatHistorySidebar = ({
 
   const pinLimitReached = pinnedIds.length >= 3;
 
-  // Ref to the hidden Clerk UserButton — we programmatically click it
-  const clerkUserBtnRef = useRef(null);
-
   const handleSettingsClick = useCallback(() => {
-    // Find and click the actual Clerk UserButton trigger inside the hidden container
-    const btn = clerkUserBtnRef.current?.querySelector("button");
-    if (btn) btn.click();
-  }, []);
+    if (onSettingsNavigate) onSettingsNavigate();
+  }, [onSettingsNavigate]);
 
   const renderChatItem = (chat) => (
     <ChatItem
@@ -651,34 +647,14 @@ export const ChatHistorySidebar = ({
             style={{ borderTop: "1px solid var(--border-primary)" }}
           >
             {isAuthenticated && user ? (
-              <>
-                <UserProfileExpanded
-                  user={user}
-                  isOnPaidPlan={isOnPaidPlan}
-                  tierName={tierName}
-                  UserButtonComponent={UserButtonComponent}
-                  OrgSwitcherComponent={OrgSwitcherComponent}
-                  onSettingsClick={handleSettingsClick}
-                />
-                {/* Hidden Clerk UserButton — rendered off-screen, clicked programmatically */}
-                {OrgSwitcherComponent && UserButtonComponent && (
-                  <div
-                    ref={clerkUserBtnRef}
-                    aria-hidden="true"
-                    className="absolute overflow-hidden"
-                    style={{
-                      width: 0,
-                      height: 0,
-                      opacity: 0,
-                      pointerEvents: "none",
-                      bottom: 44,
-                      left: 17,
-                    }}
-                  >
-                    {UserButtonComponent}
-                  </div>
-                )}
-              </>
+              <UserProfileExpanded
+                user={user}
+                isOnPaidPlan={isOnPaidPlan}
+                tierName={tierName}
+                UserButtonComponent={UserButtonComponent}
+                OrgSwitcherComponent={OrgSwitcherComponent}
+                onSettingsClick={handleSettingsClick}
+              />
             ) : (
               <div
                 className="px-2 py-2 text-center text-xs"

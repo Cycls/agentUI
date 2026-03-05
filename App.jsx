@@ -5,7 +5,13 @@ import React, {
   useMemo,
   useRef,
 } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+} from "react-router";
 import {
   ClerkProvider,
   UserButton,
@@ -32,6 +38,13 @@ import { SignUpPage } from "./components/auth/SignUpPage";
 import { VerifyEmailPage } from "./components/auth/VerifyEmailPage";
 import { CompleteSignUpPage } from "./components/auth/CompleteSignUpPage";
 import { SSOCallbackPage } from "./components/auth/SSOCallbackPage";
+
+import { SettingsLayout } from "./components/settings/SettingsLayout";
+import { SettingsAccountPage } from "./components/settings/SettingsAccountPage";
+import { SettingsBillingPage } from "./components/settings/SettingsBillingPage";
+import { SettingsTeamPage } from "./components/settings/SettingsTeamPage";
+import { SettingsDataPage } from "./components/settings/SettingsDataPage";
+import { SettingsContactPage } from "./components/settings/SettingsContactPage";
 
 import { useAnalytics } from "./contexts/AnalyticsContext";
 import {
@@ -104,12 +117,21 @@ const AppWithAuth = ({ HEADER, INTRO, AUTH, TITLE, TIER }) => {
   const authApi = useAuth();
   const userApi = useUser();
   const { organization } = useOrganization();
+  const navigate = useNavigate();
 
   const {
     subscription,
     isLoading: isSubscriptionLoading,
     error: subscriptionError,
   } = useSubscriptionContext();
+
+  const handleSettingsNavigate = useCallback(() => {
+    navigate("/settings/account");
+  }, [navigate]);
+
+  const handleNavigateToPlans = useCallback(() => {
+    navigate("/settings/account#plans");
+  }, [navigate]);
 
   return (
     <AppContent
@@ -124,6 +146,8 @@ const AppWithAuth = ({ HEADER, INTRO, AUTH, TITLE, TIER }) => {
       subscription={subscription}
       isSubscriptionLoading={isSubscriptionLoading}
       subscriptionError={subscriptionError}
+      onSettingsNavigate={handleSettingsNavigate}
+      onNavigateToPlans={handleNavigateToPlans}
     />
   );
 };
@@ -154,6 +178,8 @@ const AppContent = ({
   subscription,
   isSubscriptionLoading,
   subscriptionError,
+  onSettingsNavigate,
+  onNavigateToPlans,
 }) => {
   const analyticsEnabled = useAnalytics();
   const {
@@ -865,7 +891,7 @@ const AppContent = ({
   return (
     <div
       className="min-h-screen theme-transition"
-      style={{ backgroundColor: "var(--bg-primary)" }}
+      style={{ backgroundColor: "var(--bg-chat)" }}
     >
       {/* SEO Meta Tags */}
       <SEOHead
@@ -891,6 +917,7 @@ const AppContent = ({
         UserButtonComponent={userButtonComponent}
         OrgSwitcherComponent={orgSwitcherComponent}
         isAuthenticated={AUTH}
+        onSettingsNavigate={onSettingsNavigate}
       />
 
       {/* Billing tier modal */}
@@ -898,6 +925,7 @@ const AppContent = ({
         open={showTierModal && TIER === "cycls_pass"}
         onClose={handleDismissTierModal}
         tier={TIER || "Pro"}
+        onNavigateToPlans={onNavigateToPlans}
       />
 
       {/* File browser modal */}
@@ -1083,6 +1111,22 @@ export const Shell = ({ meta }) => {
                 </ProtectedRoute>
               }
             />
+            {/* Settings routes */}
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <SettingsLayout TIER={TIER} />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Navigate to="account" replace />} />
+              <Route path="account" element={<SettingsAccountPage />} />
+              <Route path="billing" element={<SettingsBillingPage />} />
+              <Route path="team" element={<SettingsTeamPage />} />
+              <Route path="data" element={<SettingsDataPage />} />
+              <Route path="contact" element={<SettingsContactPage />} />
+            </Route>
             <Route
               path="/auth"
               element={<Navigate to="/auth/sign-in" replace />}

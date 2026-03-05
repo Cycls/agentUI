@@ -14,23 +14,39 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
+    "@tailwindcss/forms": "^0.5.11",
+    "@tailwindcss/typography": "^0.5.19",
     "@vitejs/plugin-react": "^4.5.2",
+    "autoprefixer": "^10.4.27",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.26",
     "globals": "^16.5.0",
+    "postcss": "^8.5.8",
     "prettier": "^3.7.4",
+    "tailwindcss": "^3.4.19",
     "vite": "^6.3.5"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.58.1",
+    "@radix-ui/react-alert-dialog": "^1.1.15",
+    "@radix-ui/react-avatar": "^1.1.11",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
+    "@radix-ui/react-label": "^2.1.8",
+    "@radix-ui/react-separator": "^1.1.8",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-switch": "^1.2.6",
     "@tiptap/extension-placeholder": "^3.17.1",
     "@tiptap/extension-typography": "^3.17.1",
     "@tiptap/pm": "^3.17.1",
     "@tiptap/react": "^3.17.1",
     "@tiptap/starter-kit": "^3.17.1",
+    "axios": "^1.13.6",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "docx": "^9.5.1",
     "file-saver": "^2.0.5",
     "jspdf": "^4.0.0",
@@ -44,6 +60,7 @@
     "rehype-katex": "^7.0.1",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
-    "remark-math": "^6.0.0"
+    "remark-math": "^6.0.0",
+    "tailwind-merge": "^3.5.0"
   }
 }
