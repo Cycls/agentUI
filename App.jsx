@@ -22,8 +22,15 @@ import { ChatHistorySidebar } from "./components/Sidebar";
 import { TierModal } from "./components/TierModal";
 import { FileModal } from "./components/FileModal";
 import { ThemeToggle } from "./components/ThemeContext";
-import { AuthPage, RequireAuth } from "./components/AuthPage";
 import { SEOHead } from "./components/SEOHead";
+
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { PublicOnlyRoute } from "./components/auth/PublicOnlyRoute";
+import { SignInPage } from "./components/auth/SignInPage";
+import { SignUpPage } from "./components/auth/SignUpPage";
+import { VerifyEmailPage } from "./components/auth/VerifyEmailPage";
+import { CompleteSignUpPage } from "./components/auth/CompleteSignUpPage";
+import { SSOCallbackPage } from "./components/auth/SSOCallbackPage";
 
 import { useAnalytics } from "./contexts/AnalyticsContext";
 import {
@@ -345,7 +352,13 @@ const AppContent = ({
     if (latestCanvas && latestCanvas.content !== canvasState.content) {
       setContent(latestCanvas.content);
     }
-  }, [messages, canvasState.isOpen, canvasState.isStreaming, canvasState.content, setContent]);
+  }, [
+    messages,
+    canvasState.isOpen,
+    canvasState.isStreaming,
+    canvasState.content,
+    setContent,
+  ]);
 
   const { send, handleStop } = useChatSend({
     messages,
@@ -952,7 +965,7 @@ const AppContent = ({
         </div>
         <div className="mx-auto max-w-3xl px-4 pb-[200px] md:pb-[180px]">
           {/* Header */}
-          <div className="prose m-2 mx-auto max-w-3xl p-2 prose-pre:p-0 pt-14 md:pt-2">
+          <div className="prose m-2 mx-auto max-w-3xl p-2 prose-pre:p-0 pt-2">
             <MarkdownRenderer markdown={HEADER} onSend={send} />
           </div>
 
@@ -1029,21 +1042,49 @@ export const Shell = ({ meta }) => {
     );
   }
 
-  const clerkProps = {
-    fallbackRedirectUrl: AFTER_URL,
-    forceRedirectUrl: AFTER_URL,
-  };
-
   return (
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY} {...clerkProps}>
+    <ClerkProvider
+      publishableKey={PUBLISHABLE_KEY}
+      signInUrl="/auth/sign-in"
+      signUpUrl="/auth/sign-up"
+      afterSignOutUrl="/auth/sign-in"
+    >
       <SubscriptionProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/auth" element={<AuthPage afterUrl={AFTER_URL} />} />
+            <Route
+              path="/auth/sign-in"
+              element={
+                <PublicOnlyRoute>
+                  <SignInPage afterUrl={AFTER_URL} />
+                </PublicOnlyRoute>
+              }
+            />
+            <Route
+              path="/auth/sign-up"
+              element={
+                <PublicOnlyRoute>
+                  <SignUpPage afterUrl={AFTER_URL} />
+                </PublicOnlyRoute>
+              }
+            />
+            <Route
+              path="/auth/verify-email"
+              element={
+                <PublicOnlyRoute>
+                  <VerifyEmailPage afterUrl={AFTER_URL} />
+                </PublicOnlyRoute>
+              }
+            />
+            <Route
+              path="/auth/complete-signup"
+              element={<CompleteSignUpPage afterUrl={AFTER_URL} />}
+            />
+            <Route path="/sso-callback" element={<SSOCallbackPage />} />
             <Route
               path="/"
               element={
-                <RequireAuth>
+                <ProtectedRoute>
                   <App
                     HEADER={HEADER}
                     INTRO={INTRO}
@@ -1051,8 +1092,12 @@ export const Shell = ({ meta }) => {
                     TITLE={TITLE}
                     TIER={TIER}
                   />
-                </RequireAuth>
+                </ProtectedRoute>
               }
+            />
+            <Route
+              path="/auth"
+              element={<Navigate to="/auth/sign-in" replace />}
             />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
