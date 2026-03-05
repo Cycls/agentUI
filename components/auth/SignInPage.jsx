@@ -5,19 +5,36 @@ import { AuthLayout } from "./AuthLayout";
 import { AuthToast } from "./AuthToast";
 import { OTPInput } from "./OTPInput";
 import { mapClerkError } from "./authErrors";
-import { Eye, EyeOff, Loader2, Mail } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Loader2,
+  Mail,
+  ArrowLeft,
+  ShieldCheck,
+} from "lucide-react";
 
-// ── Shared Icons ──
-const EyeIcon = () => <Eye size={18} strokeWidth={1.5} />;
-const EyeOffIcon = () => <EyeOff size={18} strokeWidth={1.5} />;
+// ── Icons ──
 const Spinner = () => <Loader2 className="animate-spin w-5 h-5" />;
 
 const GoogleIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24">
-    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
-    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+    <path
+      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+      fill="#4285F4"
+    />
+    <path
+      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+      fill="#34A853"
+    />
+    <path
+      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+      fill="#FBBC05"
+    />
+    <path
+      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+      fill="#EA4335"
+    />
   </svg>
 );
 
@@ -125,16 +142,52 @@ export const SignInPage = ({ afterUrl = "/" }) => {
   // ── 2FA View ──
   if (needs2FA) {
     return (
-      <AuthLayout title="Two-factor authentication" subtitle="Enter the verification code sent to your email.">
+      <AuthLayout
+        title="Two-factor authentication"
+        subtitle="Enter the 6-digit code sent to your email."
+      >
         <div className="space-y-6">
-          {/* Email icon */}
+          {/* Icon badge */}
           <div className="flex justify-center">
             <div
-              className="w-14 h-14 rounded-2xl flex items-center justify-center"
-              style={{ backgroundColor: "var(--bg-tertiary)" }}
+              className="w-16 h-16 rounded-2xl flex items-center justify-center relative"
+              style={{
+                background: `linear-gradient(135deg, color-mix(in srgb, var(--accent-primary) 15%, transparent), color-mix(in srgb, var(--accent-primary) 8%, transparent))`,
+                border:
+                  "1px solid color-mix(in srgb, var(--accent-primary) 20%, transparent)",
+              }}
             >
-              <Mail size={28} strokeWidth={1.5} stroke="var(--accent-primary)" />
+              <ShieldCheck
+                size={30}
+                strokeWidth={1.5}
+                style={{ color: "var(--accent-primary)" }}
+              />
+              {/* Pulse ring */}
+              <div
+                className="absolute inset-0 rounded-2xl animate-ping opacity-20"
+                style={{
+                  border: "2px solid var(--accent-primary)",
+                  animationDuration: "2s",
+                }}
+              />
             </div>
+          </div>
+
+          {/* Sent-to indicator */}
+          <div
+            className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl mx-auto w-fit"
+            style={{
+              backgroundColor: "var(--bg-secondary)",
+              border: "1px solid var(--border-primary)",
+            }}
+          >
+            <Mail size={14} style={{ color: "var(--text-muted)" }} />
+            <span
+              className="text-[13px] font-medium"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              {email || "your email"}
+            </span>
           </div>
 
           <OTPInput
@@ -158,7 +211,7 @@ export const SignInPage = ({ afterUrl = "/" }) => {
               color: "var(--btn-primary-text)",
             }}
           >
-            {twoFALoading ? <Spinner /> : "Verify"}
+            {twoFALoading ? <Spinner /> : "Verify code"}
           </button>
 
           <button
@@ -167,10 +220,11 @@ export const SignInPage = ({ afterUrl = "/" }) => {
               setNeeds2FA(false);
               setTwoFACode("");
             }}
-            className="w-full text-sm text-center py-1 hover:underline transition-colors"
+            className="w-full flex items-center justify-center gap-2 text-sm py-2 rounded-lg transition-all hover:opacity-80"
             style={{ color: "var(--text-tertiary)" }}
           >
-            Back to sign in
+            <ArrowLeft size={15} />
+            <span>Back to sign in</span>
           </button>
         </div>
         {toast && <AuthToast {...toast} onDismiss={() => setToast(null)} />}
@@ -180,7 +234,10 @@ export const SignInPage = ({ afterUrl = "/" }) => {
 
   // ── Main Sign-In View ──
   return (
-    <AuthLayout title="Welcome back" subtitle="Sign in to your account to continue.">
+    <AuthLayout
+      title="Welcome back"
+      subtitle="Sign in to your account to continue."
+    >
       {/* Google OAuth */}
       <button
         type="button"
@@ -189,18 +246,36 @@ export const SignInPage = ({ afterUrl = "/" }) => {
         className="auth-btn-oauth w-full"
         style={{
           backgroundColor: "var(--bg-primary)",
-          border: "1px solid var(--border-primary)",
+          border: "1.5px solid var(--border-primary)",
           color: "var(--text-primary)",
         }}
       >
-        {oauthLoading ? <Spinner /> : <><GoogleIcon /><span>Continue with Google</span></>}
+        {oauthLoading ? (
+          <Spinner />
+        ) : (
+          <>
+            <GoogleIcon />
+            <span className="font-medium">Continue with Google</span>
+          </>
+        )}
       </button>
 
       {/* Divider */}
-      <div className="flex items-center gap-4 my-7">
-        <div className="flex-1 h-px" style={{ backgroundColor: "var(--border-primary)" }} />
-        <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>or</span>
-        <div className="flex-1 h-px" style={{ backgroundColor: "var(--border-primary)" }} />
+      <div className="flex items-center gap-4 my-8">
+        <div
+          className="flex-1 h-px"
+          style={{ backgroundColor: "var(--border-primary)" }}
+        />
+        <span
+          className="text-[11px] font-semibold uppercase tracking-[0.15em]"
+          style={{ color: "var(--text-muted)" }}
+        >
+          or continue with email
+        </span>
+        <div
+          className="flex-1 h-px"
+          style={{ backgroundColor: "var(--border-primary)" }}
+        />
       </div>
 
       {/* Email + Password form */}
@@ -224,10 +299,12 @@ export const SignInPage = ({ afterUrl = "/" }) => {
         </div>
 
         <div>
-          <label htmlFor="sign-in-password" className="auth-label">
-            Password
-          </label>
-          <div className="relative">
+          <div className="flex items-center justify-between mb-1.5">
+            <label htmlFor="sign-in-password" className="auth-label mb-0">
+              Password
+            </label>
+          </div>
+          <div className="relative group">
             <input
               id="sign-in-password"
               type={showPassword ? "text" : "password"}
@@ -237,44 +314,56 @@ export const SignInPage = ({ afterUrl = "/" }) => {
               onChange={(e) => setPassword(e.target.value)}
               disabled={loading}
               className="auth-input"
-              style={{ paddingRight: 44 }}
+              style={{ paddingRight: 48 }}
               placeholder="Enter your password"
             />
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-[var(--bg-hover)] transition-colors"
-              style={{ color: "var(--text-muted)" }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-all hover:scale-110"
+              style={{
+                color: "var(--text-muted)",
+                backgroundColor: "transparent",
+              }}
               tabIndex={-1}
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+              {showPassword ? (
+                <EyeOff size={17} strokeWidth={1.5} />
+              ) : (
+                <Eye size={17} strokeWidth={1.5} />
+              )}
             </button>
           </div>
         </div>
 
-        <button
-          type="submit"
-          disabled={loading || !email || !password}
-          className="auth-btn-primary w-full"
-          style={{
-            backgroundColor: "var(--btn-primary-bg)",
-            color: "var(--btn-primary-text)",
-          }}
-        >
-          {loading ? <Spinner /> : "Sign in"}
-        </button>
+        <div className="pt-1">
+          <button
+            type="submit"
+            disabled={loading || !email || !password}
+            className="auth-btn-primary w-full"
+            style={{
+              backgroundColor: "var(--btn-primary-bg)",
+              color: "var(--btn-primary-text)",
+            }}
+          >
+            {loading ? <Spinner /> : "Sign in"}
+          </button>
+        </div>
       </form>
 
       {/* Footer */}
-      <p className="text-center text-sm mt-8" style={{ color: "var(--text-tertiary)" }}>
+      <p
+        className="text-center text-[14px] mt-9"
+        style={{ color: "var(--text-tertiary)" }}
+      >
         Don&apos;t have an account?{" "}
         <Link
           to="/auth/sign-up"
-          className="font-medium hover:underline transition-colors"
+          className="font-semibold transition-all hover:opacity-80"
           style={{ color: "var(--accent-primary)" }}
         >
-          Sign up
+          Create one
         </Link>
       </p>
 
