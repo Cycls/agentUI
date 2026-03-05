@@ -18,6 +18,13 @@ export async function fetchBlob(path, getToken) {
   return URL.createObjectURL(blob);
 }
 
+export async function fetchFolderZip(path, getToken) {
+  const res = await authFetch(`/files/${encodeURIComponent(path)}?format=zip`, {}, getToken);
+  if (!res.ok) return null;
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);
+}
+
 export async function uploadFile(dirPath, file, getToken) {
   const fullPath = dirPath ? dirPath + "/" + file.name : file.name;
   const form = new FormData();
