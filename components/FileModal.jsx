@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import {
   listFiles,
   fetchBlob,
+  fetchFolderZip,
   uploadFile,
   renameItem,
   createDir,
@@ -575,6 +576,17 @@ export const FileModal = ({ open, onClose, getToken }) => {
     URL.revokeObjectURL(url);
   };
 
+  const handleDownloadFolder = async (name, e) => {
+    e.stopPropagation();
+    const url = await fetchFolderZip(fullPath(name), getToken);
+    if (!url) return;
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name + ".zip";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleClick = async (item) => {
     if (renamingItem || creatingFolder) return;
     if (item.type === "directory") {
@@ -978,19 +990,21 @@ export const FileModal = ({ open, onClose, getToken }) => {
                     </span>
 
                     <span className="file-actions">
-                      {item.type !== "directory" && (
-                        <button
-                          onClick={(e) => handleDownload(item.name, e)}
-                          className="action-btn"
-                          title="Download"
-                        >
-                          <ActionIcon>
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                            <polyline points="7 10 12 15 17 10" />
-                            <line x1="12" y1="15" x2="12" y2="3" />
-                          </ActionIcon>
-                        </button>
-                      )}
+                      <button
+                        onClick={(e) =>
+                          item.type === "directory"
+                            ? handleDownloadFolder(item.name, e)
+                            : handleDownload(item.name, e)
+                        }
+                        className="action-btn"
+                        title={item.type === "directory" ? "Download as ZIP" : "Download"}
+                      >
+                        <ActionIcon>
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="7 10 12 15 17 10" />
+                          <line x1="12" y1="15" x2="12" y2="3" />
+                        </ActionIcon>
+                      </button>
                       <button
                         onClick={(e) => startRename(item, e)}
                         className="action-btn"
