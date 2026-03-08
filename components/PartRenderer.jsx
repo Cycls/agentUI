@@ -3,6 +3,7 @@ import { ChevronDown, Globe, FileText, ExternalLink, Download } from "lucide-rea
 import { MarkdownRenderer } from "./MarkdownRenderer";
 import { useCanvas } from "../contexts/CanvasContext";
 import { useAuthSrc } from "../hooks/useAuthSrc";
+import PaymentBlock from "./PaymentBlock";
 
 const cx = (...cls) => cls.filter(Boolean).join(" ");
 
@@ -507,6 +508,11 @@ export const PartRenderer = React.memo(function PartRenderer({
   // Handle image type with native download UI (format: {type: "image", image: "url"})
   if (part.type === "image" && part.image) {
     return <ImageBlock src={part.image} alt={part.alt} getToken={getToken} />;
+  }
+
+  // Handle payment type - Stripe Embedded Checkout
+  if (part.type === "payment") {
+    return <PaymentBlock clientSecret={part.clientSecret} paymentId={part.paymentId} />;
   }
 
   // For all other types, convert to markdown and use MarkdownRenderer
