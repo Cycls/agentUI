@@ -217,6 +217,18 @@ export const useChatSend = ({
               // Non-step part received - reset stepsPart so next steps create a new block
               stepsPart = null;
 
+              // Handle payment - single complete part, no aggregation
+              if (item.type === "payment") {
+                currentPart = null;
+                const paymentPart = {
+                  type: "payment",
+                  clientSecret: item.clientSecret || item.client_secret || "",
+                  paymentId: item.paymentId || item.payment_id || "",
+                };
+                assistantMsg.parts.push(paymentPart);
+                return updated;
+              }
+
               // Check if we can aggregate with current part
               if (currentPart && currentPart.type === item.type) {
                 // Aggregate based on type
