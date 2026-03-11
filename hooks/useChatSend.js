@@ -229,6 +229,17 @@ export const useChatSend = ({
                 return updated;
               }
 
+              // Handle file - single complete part, no aggregation
+              if (item.type === "file") {
+                currentPart = null;
+                assistantMsg.parts.push({
+                  type: "file",
+                  path: item.path || "",
+                  name: item.name || "",
+                });
+                return updated;
+              }
+
               // Check if we can aggregate with current part
               if (currentPart && currentPart.type === item.type) {
                 // Aggregate based on type
