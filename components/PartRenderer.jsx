@@ -4,6 +4,7 @@ import { MarkdownRenderer } from "./MarkdownRenderer";
 import { useCanvas } from "../contexts/CanvasContext";
 import { useAuthSrc } from "../hooks/useAuthSrc";
 import PaymentBlock from "./PaymentBlock";
+import FileBlock from "./FileBlock";
 
 const cx = (...cls) => cls.filter(Boolean).join(" ");
 
@@ -513,6 +514,11 @@ export const PartRenderer = React.memo(function PartRenderer({
   // Handle payment type - Stripe Embedded Checkout
   if (part.type === "payment") {
     return <PaymentBlock clientSecret={part.clientSecret} paymentId={part.paymentId} />;
+  }
+
+  // Handle file type - authenticated PDF preview with download
+  if (part.type === "file") {
+    return <FileBlock path={part.path} name={part.name} getToken={getToken} />;
   }
 
   // For all other types, convert to markdown and use MarkdownRenderer
