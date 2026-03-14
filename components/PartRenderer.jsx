@@ -513,7 +513,7 @@ export const PartRenderer = React.memo(function PartRenderer({
 
   // Handle payment type - Stripe Embedded Checkout
   if (part.type === "payment") {
-    return <PaymentBlock clientSecret={part.clientSecret} paymentId={part.paymentId} />;
+    return <PaymentBlock clientSecret={part.clientSecret} paymentId={part.paymentId} onSend={onSend} />;
   }
 
   // Handle file type - authenticated PDF preview with download
