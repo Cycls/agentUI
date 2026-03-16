@@ -1,10 +1,10 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   EmbeddedCheckoutProvider,
   EmbeddedCheckout,
 } from "@stripe/react-stripe-js";
-import { CheckCircle, AlertCircle, ArrowRight } from "lucide-react";
+import { CheckCircle, AlertCircle } from "lucide-react";
 import { CONFIG } from "../clientConfig";
 import { useTheme } from "./ThemeContext";
 
@@ -41,7 +41,7 @@ function ErrorState({ message }) {
   );
 }
 
-function SuccessState({ onContinue, continued }) {
+function SuccessState() {
   return (
     <div
       className="my-3 rounded-lg border flex items-center gap-3 px-4 py-4 theme-transition"
@@ -56,38 +56,19 @@ function SuccessState({ onContinue, continued }) {
         className="flex-shrink-0"
         style={{ color: "var(--text-success, #309454)" }}
       />
-      <div className="flex-1">
-        <span
-          className="text-sm font-medium block"
-          style={{ color: "var(--text-primary)" }}
-        >
-          Payment successful
-        </span>
-        {continued ? (
-          <span className="text-xs" style={{ color: "var(--text-tertiary)" }}>
-            Your payment has been processed.
-          </span>
-        ) : (
-          <button
-            onClick={onContinue}
-            className="mt-1.5 inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md transition-colors cursor-pointer"
-            style={{
-              backgroundColor: "var(--text-success, #309454)",
-              color: "#fff",
-            }}
-          >
-            Continue conversation
-            <ArrowRight size={13} strokeWidth={2} />
-          </button>
-        )}
-      </div>
+      <span
+        className="text-sm font-medium"
+        style={{ color: "var(--text-primary)" }}
+      >
+        Payment successful
+      </span>
     </div>
   );
 }
 
 export default function PaymentBlock({ clientSecret, onSend }) {
   const [status, setStatus] = useState("checkout");
-  const [continued, setContinued] = useState(false);
+  const sentRef = useRef(false);
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
 
@@ -95,12 +76,12 @@ export default function PaymentBlock({ clientSecret, onSend }) {
     setStatus("complete");
   }, []);
 
-  const handleContinue = useCallback(() => {
-    setContinued(true);
-    if (onSend) {
+  useEffect(() => {
+    if (status === "complete" && !sentRef.current && onSend) {
+      sentRef.current = true;
       onSend({ text: "Payment successful" });
     }
-  }, [onSend]);
+  }, [status, onSend]);
 
   if (!stripePromise) {
     return <ErrorState message="Payment is not configured." />;
@@ -111,7 +92,7 @@ export default function PaymentBlock({ clientSecret, onSend }) {
   }
 
   if (status === "complete") {
-    return <SuccessState onContinue={handleContinue} continued={continued} />;
+    return <SuccessState />;
   }
 
   return (
