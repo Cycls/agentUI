@@ -56,12 +56,17 @@ function SuccessState() {
         className="flex-shrink-0"
         style={{ color: "var(--text-success, #309454)" }}
       />
-      <span
-        className="text-sm font-medium"
-        style={{ color: "var(--text-primary)" }}
-      >
-        Payment successful
-      </span>
+      <div className="flex-1">
+        <span
+          className="text-sm font-medium block"
+          style={{ color: "var(--text-primary)" }}
+        >
+          Payment successful
+        </span>
+        <span className="text-xs" style={{ color: "var(--text-tertiary)" }}>
+          You can now continue the conversation.
+        </span>
+      </div>
     </div>
   );
 }
@@ -79,7 +84,7 @@ export default function PaymentBlock({ clientSecret, onSend }) {
   useEffect(() => {
     if (status === "complete" && !sentRef.current && onSend) {
       sentRef.current = true;
-      onSend({ text: "Payment successful" });
+      onSend({ text: "Payment successful", hidden: true });
     }
   }, [status, onSend]);
 
