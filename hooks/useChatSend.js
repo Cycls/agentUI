@@ -36,6 +36,7 @@ export const useChatSend = ({
       const text = hasPayload ? payload.text || "" : String(payload || "");
       // Attachments are now pre-uploaded, so we receive metadata directly
       const attachments = hasPayload ? payload.attachments || [] : [];
+      const hidden = hasPayload ? !!payload.hidden : false;
 
       if (!text.trim() && attachments.length === 0) {
         setShouldFocus(true);
@@ -67,7 +68,10 @@ export const useChatSend = ({
       const newUserMessage = { role: "user", content: finalContent };
       const newAssistantMessage = { role: "assistant", parts: [] };
 
-      setMessages((prev) => [...prev, newUserMessage, newAssistantMessage]);
+      setMessages((prev) => hidden
+        ? [...prev, newAssistantMessage]
+        : [...prev, newUserMessage, newAssistantMessage]
+      );
 
       const newMessages = [...messages, newUserMessage];
 
