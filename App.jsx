@@ -73,6 +73,7 @@ import {
   deleteSession,
 } from "./services/sessions";
 import { sendCyclsChatMessage } from "./services/api";
+import { getPlanSlug } from "./utils/passAgent";
 
 import {
   trackChatSelected,
@@ -224,7 +225,8 @@ const AppContent = ({
 
   const isOnPaidPlan = useMemo(() => {
     if (!subscription) return false;
-    return subscription?.subscriptionItems?.[0]?.plan?.name === "Cycls Pass";
+    const slug = getPlanSlug(subscription);
+    return slug !== "trial";
   }, [subscription]);
 
   const tierName = useMemo(() => {
