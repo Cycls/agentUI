@@ -266,6 +266,11 @@ export const SignInPage = ({ afterUrl = "/" }) => {
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
             className="auth-input"
+            style={{
+              backgroundColor: "var(--input-bg)",
+              borderColor: "var(--input-border)",
+              color: "var(--text-primary)",
+            }}
             placeholder="you@example.com"
           />
         </div>
@@ -284,7 +289,12 @@ export const SignInPage = ({ afterUrl = "/" }) => {
               onChange={(e) => setPassword(e.target.value)}
               disabled={loading}
               className="auth-input"
-              style={{ paddingRight: 44 }}
+              style={{
+                paddingRight: 44,
+                backgroundColor: "var(--input-bg)",
+                borderColor: "var(--input-border)",
+                color: "var(--text-primary)",
+              }}
               placeholder="Enter your password"
             />
             <button

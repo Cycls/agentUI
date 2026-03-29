@@ -685,7 +685,7 @@ body {
   padding: 0 14px;
   border-radius: 12px;
   border: 1.5px solid var(--input-border);
-  background-color: var(--bg-secondary);
+  background-color: var(--input-bg);
   color: var(--text-primary);
   font-size: 14px;
   font-family: inherit;
@@ -706,7 +706,6 @@ body {
 
 .auth-input:focus {
   border-color: var(--input-focus-border);
-  background-color: var(--bg-primary);
   box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.1);
 }
 
