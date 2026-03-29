@@ -126,13 +126,10 @@
   --btn-secondary-text: #0d0d0d;
 
   /* Auth card */
-  --auth-page-bg: #eef0f4;
+  --auth-page-bg: #fafafa;
   --auth-card-bg: #ffffff;
-  --auth-card-border: #dde0e6;
-  --auth-card-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.03),
-    0 12px 48px -8px rgba(0, 0, 0, 0.1),
-    0 4px 12px -2px rgba(0, 0, 0, 0.05);
+  --auth-card-border: rgba(0, 0, 0, 0.06);
+  --auth-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.02);
 }
 
 /* Dark mode - activated by class or system preference */
@@ -188,12 +185,9 @@
 
   /* Auth card */
   --auth-page-bg: #09090b;
-  --auth-card-bg: #141414;
+  --auth-card-bg: #111113;
   --auth-card-border: rgba(255, 255, 255, 0.06);
-  --auth-card-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.04),
-    0 12px 48px -8px rgba(0, 0, 0, 0.6),
-    0 4px 12px -2px rgba(0, 0, 0, 0.4);
+  --auth-card-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 8px 24px rgba(0, 0, 0, 0.25);
 }
 
 /* System preference detection (when no manual override) */
@@ -244,12 +238,9 @@
     --btn-secondary-text: #f4f4f5;
 
     --auth-page-bg: #09090b;
-    --auth-card-bg: #141414;
+    --auth-card-bg: #111113;
     --auth-card-border: rgba(255, 255, 255, 0.06);
-    --auth-card-shadow:
-      0 0 0 1px rgba(255, 255, 255, 0.04),
-      0 12px 48px -8px rgba(0, 0, 0, 0.6),
-      0 4px 12px -2px rgba(0, 0, 0, 0.4);
+    --auth-card-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 8px 24px rgba(0, 0, 0, 0.25);
   }
 }
 
@@ -659,7 +650,7 @@ body {
 @keyframes authSlideUp {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -670,11 +661,11 @@ body {
 @keyframes authCardEnter {
   from {
     opacity: 0;
-    transform: translateY(16px) scale(0.98);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
@@ -683,7 +674,7 @@ body {
 }
 
 .auth-card-enter {
-  animation: authCardEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: authCardEnter 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ── Input fields ── */
@@ -692,7 +683,7 @@ body {
   width: 100%;
   height: 44px;
   padding: 0 14px;
-  border-radius: 10px;
+  border-radius: 12px;
   border: 1.5px solid var(--input-border);
   background-color: var(--input-bg);
   color: var(--text-primary);
@@ -710,11 +701,11 @@ body {
 
 .auth-input:focus {
   border-color: var(--input-focus-border);
-  box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.12);
+  box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.1);
 }
 
 .auth-input:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -736,16 +727,14 @@ body {
   justify-content: center;
   gap: 8px;
   height: 44px;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 14px;
   font-weight: 600;
-  letter-spacing: 0.01em;
   border: none;
   cursor: pointer;
   transition:
     opacity 0.15s ease,
-    transform 0.1s ease,
-    box-shadow 0.15s ease;
+    transform 0.1s ease;
 }
 
 .auth-btn-primary:hover:not(:disabled) {
@@ -757,7 +746,7 @@ body {
 }
 
 .auth-btn-primary:disabled {
-  opacity: 0.45;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
@@ -767,22 +756,20 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  height: 44px;
-  border-radius: 10px;
+  gap: 8px;
+  height: 46px;
+  border-radius: 12px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition:
     background-color 0.15s ease,
     border-color 0.15s ease,
-    box-shadow 0.15s ease,
     transform 0.1s ease;
 }
 
 .auth-btn-oauth:hover:not(:disabled) {
   background-color: var(--bg-hover) !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .auth-btn-oauth:active:not(:disabled) {
@@ -794,11 +781,34 @@ body {
   cursor: not-allowed;
 }
 
+/* ── Divider ── */
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background-color: var(--border-primary);
+}
+
+.auth-divider span {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
 /* ── OTP inputs ── */
 
 .otp-input:focus {
   border-color: var(--input-focus-border) !important;
-  box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.12);
+  box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.1);
 }
 
 /* ── Reduced motion ── */
